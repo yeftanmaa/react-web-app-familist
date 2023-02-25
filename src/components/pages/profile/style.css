@@ -11,3 +11,20 @@
     height: 600px;
     justify-content: center;
 }
+
+.box {
+    justify-content: flex-end;
+    display: flex;
+    gap: 20px;
+    position: fixed;
+    bottom: 7%;
+}
+
+.profile-details {
+    display: block;
+    margin: 10px 0;
+}
+
+.btn-group {
+    width: 100px;
+}

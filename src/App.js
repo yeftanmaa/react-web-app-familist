@@ -28,10 +28,19 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           fontSize: '16px'
-        }
-      }
-    }
-  }
+        },
+      },
+    },
+  },
+  palette: {
+    primary: {
+      main: '#1E8CF1',
+    },
+    cancel: {
+      main: '#F11E1E',
+      contrastText: '#fff',
+    },
+  },
 });
 
 function App() {
