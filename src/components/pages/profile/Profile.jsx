@@ -1,18 +1,44 @@
 import { TextField, Typography, Button, Box } from "@mui/material";
 import { Container } from "@mui/system";
 import { signOut } from "firebase/auth";
-import { React, useState } from "react";
-import { auth } from "../../../firebase";
+import { React, useEffect, useRef, useState } from "react";
+import { auth, db } from "../../../firebase";
 import css from './style.css';
+import { collection, getDocs, query, where } from "firebase/firestore";
 
 const Profile = () => {
-
-    const [workspaceName, setWorkspaceName] = useState("Nathan's Family");
+    const getDataName = useRef(null);
+    const [workspaceName, setWorkspaceName] = useState("");
     const [workspaceDesc, setWorkspaceDesc] = useState("This is Nathan workspace with his family.");
+
+    useEffect(() => {
+        const unsubscribe = auth.onAuthStateChanged((user) => {
+            if (user) {
+                const userCollectionRef = collection(db, "users");
+                const q = query(userCollectionRef, where("email", "==", user?.email));
+
+                getDocs(q).then((querySnapshot) => {
+                    querySnapshot.docs.forEach((doc) => {
+                        getDataName.current = doc.data().name + "'s Family";
+                        setWorkspaceName(doc.data().name + "'s Family");
+                    });
+                }).catch((error) => {
+                    console.log("Error getting documents: ", error);
+                });
+
+            } else {
+              console.log("No user is currently signed in.");
+            }
+          });
+        return unsubscribe;
+        
+    }, [])
+
+    
 
     const handleBlur = (e) => {
         if (e.target.value === '') {
-            setWorkspaceName("Nathan's Family");
+            setWorkspaceName(getDataName.current);
         }
     };
 
@@ -34,10 +60,10 @@ const Profile = () => {
                         <TextField
                             
                             value={workspaceName} // get real value from firestore db
+                            onBlur={handleBlur}
                             onChange={(event) => setWorkspaceName(event.target.value)}
                             id="outlined-password-input"
                             placeholder="Put your workspace name"
-                            // defaultValue="Nathan's Family" 
                             type="text"
                             size="small"
                             style={{width: '300px', margin: '10px 0'}}
@@ -65,7 +91,7 @@ const Profile = () => {
                     </div>                        
 
                     <Box className="box" sx={css}>
-                        <Button className="btn-group" sx={css} color="primary" disabled={workspaceName === '' || workspaceName === "Nathan's Family"} variant="contained" disableElevation>Edit</Button>
+                        <Button className="btn-group" sx={css} color="primary" disabled={workspaceName === '' || workspaceName === getDataName.current} variant="contained" disableElevation>Edit</Button>
                         <Button onClick={handleLogout} className="btn-group" sx={css} color="cancel" variant="contained" disableElevation href="/auth">Logout</Button>
                     </Box>
 

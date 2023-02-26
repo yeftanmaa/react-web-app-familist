@@ -3,27 +3,45 @@ import { Button, Typography, Box, TextField } from "@mui/material";
 import css from "./style.css"
 import { Container } from "@mui/system";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../../firebase";
+import { auth, db } from "../../../firebase";
 import { useNavigate } from "react-router-dom";
+import { collection, addDoc } from "firebase/firestore"
 
 const Registration = () => {
 
+    // navigation component
     const navigate = useNavigate();
 
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+    // 
+    const [newName, setNewName] = useState("");
+    const [newEmail, setNewEmail] = useState("");
+    const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+
+    const userCollectionRef = collection(db, "users");
 
     const handleRegistration = async() => {
 
-        if (email === "" || password === "" || confirmPassword === "") {
+        // not allowing empty input
+        if (newName === "" || newEmail === "" || newPassword === "" || confirmPassword === "") {
             alert("Field cannot left empty!");
-        }
+        };
 
-        if (password === confirmPassword) {
+        // check if password and confirmPassword are matched
+        if (newPassword === confirmPassword) {
             try {
-                await createUserWithEmailAndPassword(auth, email, password);
-                alert ("Your account is Created!");
+                // create a new user in Firebase Auth
+                await createUserWithEmailAndPassword(auth, newEmail, newPassword);
+                
+                // Add user's name, email and password to Firestore
+                await addDoc(userCollectionRef, {
+                    name: newName,
+                    email: newEmail,
+                    password: newPassword
+                });
+
+                // confirm to user and navigate to login
+                alert ("Your account is created!");
                 navigate('/auth');
             } catch(err) {
                 console.error(err);
@@ -49,6 +67,20 @@ const Registration = () => {
                 <div className="regis-box" style={css}>
                     <Typography variant="h4" sx={{marginBottom: '10px'}}>Registration</Typography>
 
+                    {/* Name Input */}
+                    <Box>
+                        <TextField
+                            id="outlined-password-input"
+                            label="Full Name"
+                            type="text"
+                            size="small"
+                            onChange={(e) => setNewName(e.target.value)}
+                            placeholder="Set your full name"
+                            style={{width: '300px', margin: '10px 0'}}
+                            inputProps={{style: {fontSize: 15}}}
+                        />
+                    </Box>
+
                     {/* Email Input */}
                     <Box>
                         <TextField
@@ -56,7 +88,7 @@ const Registration = () => {
                             label="Email address"
                             type="email"
                             size="small"
-                            onChange={(e) => setEmail(e.target.value)}
+                            onChange={(e) => setNewEmail(e.target.value)}
                             placeholder="Set your email address"
                             style={{width: '300px', margin: '10px 0'}}
                             inputProps={{style: {fontSize: 15}}}
@@ -71,7 +103,7 @@ const Registration = () => {
                             type="password"
                             autoComplete="current-password"
                             size="small"
-                            onChange={(e) => setPassword(e.target.value)}
+                            onChange={(e) => setNewPassword(e.target.value)}
                             placeholder="Set your password"
                             style={{width: '300px', margin: '10px 0'}}
                             inputProps={{style: {fontSize: 15}}}
