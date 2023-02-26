@@ -22,6 +22,7 @@ import PrivateRoute from './components/PrivateRoute';
 // make all mui typography components is lowercase
 const theme = createTheme({
   typography: {
+    fontFamily: 'Inter, sans-serif',
     allVariants: {
       textTransform: 'none',
       letterSpacing: '0px',
@@ -29,6 +30,9 @@ const theme = createTheme({
   },
   components: {
     MuiButton: {
+      defaultProps: {
+        disableElevation: true,
+      },
       styleOverrides: {
         root: {
           fontSize: '16px'

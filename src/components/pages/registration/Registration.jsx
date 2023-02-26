@@ -42,7 +42,7 @@ const Registration = () => {
 
                 // confirm to user and navigate to login
                 alert ("Your account is created!");
-                navigate('/auth');
+                navigate('/');
             } catch(err) {
                 console.error(err);
             }

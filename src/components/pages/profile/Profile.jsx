@@ -50,7 +50,7 @@ const Profile = () => {
         <div>
             <Container>
                 <div className="profile-box" style={css}>
-                    <Typography variant="h4" marginBottom={2}>Profile</Typography>
+                    <Typography variant="h3" marginBottom={2}>Profile</Typography>
                     
                     <div className="profile-details" style={css}>
                         <Typography variant="body">Workspace Name:</Typography>
@@ -92,7 +92,7 @@ const Profile = () => {
 
                     <Box className="box" sx={css}>
                         <Button className="btn-group" sx={css} color="primary" disabled={workspaceName === '' || workspaceName === getDataName.current} variant="contained" disableElevation>Edit</Button>
-                        <Button onClick={handleLogout} className="btn-group" sx={css} color="cancel" variant="contained" disableElevation href="/auth">Logout</Button>
+                        <Button onClick={handleLogout} className="btn-group" sx={css} color="cancel" variant="contained" disableElevation href="/">Logout</Button>
                     </Box>
 
                     <p style={{opacity: 0.3, position: 'fixed', bottom: 0}}>Copyright 2023. Thesis Project Purposes.</p>
