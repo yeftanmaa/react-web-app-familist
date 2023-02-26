@@ -27,7 +27,7 @@ const PrivateRoute = props => {
 
   return currentUser 
     ? <Outlet />                        // <-- render outlet for routes
-    : <Navigate to="/auth" replace />; // <-- redirect to log in
+    : <Navigate to="/" replace />; // <-- redirect to log in
 };
 
 export default PrivateRoute;

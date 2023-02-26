@@ -55,11 +55,11 @@ const Registration = () => {
     return (
         <div>
             <div className="navbar" style={css}>
-                 <a href="/auth"><img src="/logo-only.png" alt="familist" width={45} style={{border: "1px solid white"}} /></a>
+                 <a href="/"><img src="/logo-only.png" alt="familist" width={45} style={{border: "1px solid white"}} /></a>
 
                  <Box style={{display: "flex", alignItems: "center"}}>
                     <Typography>Have an account?</Typography>
-                    <Button sx={{color: "black",border: "1px solid rgba(0, 0, 0, 0.21)", padding: "5px 20px", marginLeft: "10px"}} href="/auth">Log in</Button>
+                    <Button sx={{color: "black",border: "1px solid rgba(0, 0, 0, 0.21)", padding: "5px 20px", marginLeft: "10px"}} href="/">Log in</Button>
                  </Box>
             </div>
 

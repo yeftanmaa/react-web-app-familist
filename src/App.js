@@ -62,7 +62,7 @@ function App() {
       <BrowserRouter>
         <TabsComponent />
         <Routes>
-          <Route path='/auth' element={ <Login />} />
+          <Route path='/' element={ <Login />} />
           <Route path='/register' element={<Registration />} />
 
           {/* automatically redirect user if they not logged in */}

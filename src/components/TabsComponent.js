@@ -19,14 +19,14 @@ function TabsComponent() {
   const activeTab = pathToTabIndex[location.pathname];
 
   // hide this tabs inside auth or registration page
-  if(location.pathname === '/auth' || location.pathname === '/register') {
+  if(location.pathname === '/' || location.pathname === '/register') {
     return null;
   }
 
   return (
     <div>
         <div className="navbar" style={css}>
-            <a href="/auth"><img src="/logo_familist.png" alt="familist with text" width={120} style={{border: "1px solid white"}} /></a>
+            <a href="/"><img src="/logo_familist.png" alt="familist with text" width={120} style={{border: "1px solid white"}} /></a>
 
             <Box sx={{ width: '100%' }}>
                 <Box>
