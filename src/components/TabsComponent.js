@@ -19,7 +19,7 @@ function TabsComponent() {
   const activeTab = pathToTabIndex[location.pathname];
 
   // hide this tabs inside auth or registration page
-  if(location.pathname === '/auth' || location.pathname === '/registration') {
+  if(location.pathname === '/auth' || location.pathname === '/register') {
     return null;
   }
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { createTheme, ThemeProvider } from '@mui/material';
 
 // page import
@@ -14,6 +14,10 @@ import LiveBoard from './components/pages/live-board/LiveBoard';
 // firebase import
 import handleSubmit from './handler/handleSubmit';
 import { useRef } from 'react';
+
+// route import
+import PrivateRoute from './components/PrivateRoute';
+
 
 // make all mui typography components is lowercase
 const theme = createTheme({
@@ -55,11 +59,19 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <Router>
+      <BrowserRouter>
         <TabsComponent />
         <Routes>
-          <Route path='/auth' exact element={ <Login />} />
-          <Route path='/registration' element={<Registration />} />
+          <Route path='/auth' element={ <Login />} />
+          <Route path='/register' element={<Registration />} />
+
+          {/* automatically redirect user if they not logged in */}
+          <Route element={<PrivateRoute />}>
+            <Route path='/profile' element={<Profile />} />
+            <Route path='/dashboard' element={<Dashboard />} />
+            <Route path='/live-board' element={<LiveBoard />} />
+            <Route path='/scheduler' element={<Scheduler />} />
+          </Route>
 
           <Route path='/test' element = {
             <div>
@@ -71,13 +83,8 @@ function App() {
           }
           ></Route>
 
-          <Route path='/dashboard' element={<Dashboard />} />
-          <Route path='/live-board' element={<LiveBoard />} />
-          <Route path='/scheduler' element={<Scheduler />} />
-          <Route path='/profile' element={<Profile />} />
-
         </Routes>
-      </Router>
+      </BrowserRouter>
     </ThemeProvider>
   );
 }

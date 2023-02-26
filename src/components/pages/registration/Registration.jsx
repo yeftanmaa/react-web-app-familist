@@ -1,9 +1,38 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button, Typography, Box, TextField } from "@mui/material";
 import css from "./style.css"
 import { Container } from "@mui/system";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../../../firebase";
+import { useNavigate } from "react-router-dom";
 
 const Registration = () => {
+
+    const navigate = useNavigate();
+
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+
+    const handleRegistration = async() => {
+
+        if (email === "" || password === "" || confirmPassword === "") {
+            alert("Field cannot left empty!");
+        }
+
+        if (password === confirmPassword) {
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+                alert ("Your account is Created!");
+                navigate('/auth');
+            } catch(err) {
+                console.error(err);
+            }
+        } else {
+            alert("Please confirm your password correctly!");
+        }
+        
+    }
 
     return (
         <div>
@@ -27,6 +56,7 @@ const Registration = () => {
                             label="Email address"
                             type="email"
                             size="small"
+                            onChange={(e) => setEmail(e.target.value)}
                             placeholder="Set your email address"
                             style={{width: '300px', margin: '10px 0'}}
                             inputProps={{style: {fontSize: 15}}}
@@ -41,6 +71,7 @@ const Registration = () => {
                             type="password"
                             autoComplete="current-password"
                             size="small"
+                            onChange={(e) => setPassword(e.target.value)}
                             placeholder="Set your password"
                             style={{width: '300px', margin: '10px 0'}}
                             inputProps={{style: {fontSize: 15}}}
@@ -55,13 +86,14 @@ const Registration = () => {
                             type="password"
                             autoComplete="current-password"
                             size="small"
+                            onChange={(e) => setConfirmPassword(e.target.value)}
                             placeholder="Confirm your password"
                             style={{width: '300px', margin: '10px 0'}}
                             inputProps={{style: {fontSize: 15}}}
                         />
                     </Box>
 
-                    {/* Access Token Field */}
+                    {/* Access Token Field
                     <Box>
                         <TextField
                             id="outlined-password-input"
@@ -74,9 +106,9 @@ const Registration = () => {
                             style={{width: '300px', margin: '10px 0'}}
                             inputProps={{style: {fontSize: 15}}}
                         />
-                    </Box>
+                    </Box> */}
 
-                    <Button variant="contained" sx={{width: '300px', backgroundColor: '#1E8CF1'}} disableElevation>Create an account</Button>
+                    <Button onClick={handleRegistration} variant="contained" sx={{width: '300px', backgroundColor: '#1E8CF1'}} disableElevation>Create an account</Button>
 
                     <p style={{opacity: 0.3, position: 'fixed', bottom: 0}}>Copyright 2023. Thesis Project Purposes.</p>
                 </div>

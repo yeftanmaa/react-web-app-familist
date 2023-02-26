@@ -1,6 +1,8 @@
 import { TextField, Typography, Button, Box } from "@mui/material";
 import { Container } from "@mui/system";
+import { signOut } from "firebase/auth";
 import { React, useState } from "react";
+import { auth } from "../../../firebase";
 import css from './style.css';
 
 const Profile = () => {
@@ -13,6 +15,10 @@ const Profile = () => {
             setWorkspaceName("Nathan's Family");
         }
     };
+
+    const handleLogout =() => {
+        signOut(auth);
+    }
 
     return (
         <div>
@@ -56,12 +62,11 @@ const Profile = () => {
                             style={{width: '300px', margin: '10px 0'}}
                             inputProps={{style: {fontSize: 15}}}
                         />
-                    </div>
-                        
+                    </div>                        
 
                     <Box className="box" sx={css}>
                         <Button className="btn-group" sx={css} color="primary" disabled={workspaceName === '' || workspaceName === "Nathan's Family"} variant="contained" disableElevation>Edit</Button>
-                        <Button className="btn-group" sx={css} color="cancel" variant="contained" disableElevation href="/auth">Logout</Button>
+                        <Button onClick={handleLogout} className="btn-group" sx={css} color="cancel" variant="contained" disableElevation href="/auth">Logout</Button>
                     </Box>
 
                     <p style={{opacity: 0.3, position: 'fixed', bottom: 0}}>Copyright 2023. Thesis Project Purposes.</p>

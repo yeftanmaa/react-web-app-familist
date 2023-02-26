@@ -1,9 +1,42 @@
-import React from "react";
+import React, { useState } from "react";
+import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import { auth, googleProvider } from "../../../firebase";
 import { Button, Typography, Box, TextField, Link } from "@mui/material";
 import css from "./style.css"
 import { Container } from "@mui/system";
+import { useNavigate } from "react-router-dom";
+import GoogleIcon from '@mui/icons-material/Google';
 
-const Registration = () => {
+const Login = () => {
+
+    const navigate = useNavigate();
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+
+    const loginHandler = async (e) => {
+        e.preventDefault();
+
+        try {
+            const userCredential = await signInWithEmailAndPassword(
+                auth,
+                email,
+                password
+              );
+              if (userCredential.user) {
+                navigate("/dashboard");
+              }
+        } catch (err) {
+            alert("Please enter correct email and password!");
+        }
+    }
+
+    const signInWithGoogle = async () => {
+        try {
+            await signInWithPopup(auth, googleProvider);
+        } catch (err) {
+            alert(err);
+        }
+    }
 
     return (
         <div>
@@ -12,7 +45,7 @@ const Registration = () => {
 
                  <Box style={{display: "flex", alignItems: "center"}}>
                     <Typography>New to Familist?</Typography>
-                    <Button sx={{color: "black",border: "1px solid rgba(0, 0, 0, 0.21)", padding: "5px 20px", marginLeft: "10px"}} href="/registration">Create an account</Button>
+                    <Button sx={{color: "black",border: "1px solid rgba(0, 0, 0, 0.21)", padding: "5px 20px", marginLeft: "10px"}} href="/register">Create an account</Button>
                  </Box>
             </div>
 
@@ -27,6 +60,7 @@ const Registration = () => {
                             label="Email address"
                             type="email"
                             size="small"
+                            onChange={(e) => setEmail(e.target.value)}
                             placeholder="Enter your email address"
                             style={{width: '300px', margin: '10px 0'}}
                             inputProps={{style: {fontSize: 15}}}
@@ -41,6 +75,7 @@ const Registration = () => {
                             type="password"
                             autoComplete="current-password"
                             size="small"
+                            onChange={(e) => setPassword(e.target.value)}
                             placeholder="Enter your password"
                             style={{width: '300px', margin: '10px 0'}}
                             inputProps={{style: {fontSize: 15}}}
@@ -48,7 +83,7 @@ const Registration = () => {
                     </Box>
 
                     {/* Access Token Field */}
-                    <Box>
+                    {/* <Box>
                         <TextField
                             id="outlined-password-input"
                             label="Access Token"
@@ -59,9 +94,13 @@ const Registration = () => {
                             style={{width: '300px', margin: '10px 0'}}
                             inputProps={{style: {fontSize: 15}}}
                         />
+                    </Box> */}
+                    
+                    <Box width={"300px"} sx={{display: 'flex', gap: "10px"}}>
+                        <Button onClick={loginHandler} variant="contained" sx={{width: '150px', backgroundColor: '#1E8CF1'}} disableElevation>Sign In</Button>
+                        <Button onClick={signInWithGoogle} variant="contained" color="secondary" sx={{width: '150px'}} startIcon={<GoogleIcon />}>Use Google</Button>
                     </Box>
-
-                    <Button variant="contained" sx={{width: '300px', backgroundColor: '#1E8CF1'}} disableElevation>Sign In</Button>
+                    
                     <Link sx={{fontSize: '15px', marginTop: '10px', cursor: "pointer"}}>Forgot password?</Link>
 
                     <p style={{opacity: 0.3, position: 'fixed', bottom: 0}}>Copyright 2023. Thesis Project Purposes.</p>
@@ -72,4 +111,4 @@ const Registration = () => {
     );
 }
  
-export default Registration;
+export default Login;
