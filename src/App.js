@@ -16,7 +16,7 @@ import handleSubmit from './handler/handleSubmit';
 import { useRef } from 'react';
 
 // route import
-import PrivateRoute from './components/PrivateRoute';
+import PrivateRoute from './components/routes/PrivateRoute';
 
 
 // make all mui typography components is lowercase

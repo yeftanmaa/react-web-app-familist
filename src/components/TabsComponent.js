@@ -1,6 +1,6 @@
 import { React } from 'react';
 import { Tabs, Tab, Box } from '@mui/material';
-import css from './global-style.css';
+import css from './styles/global-style.css';
 import { Link, useLocation } from 'react-router-dom';
 
 function TabsComponent() {

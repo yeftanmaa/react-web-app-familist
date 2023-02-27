@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../../../firebase";
 import { Button, Typography, Box, TextField, Link } from "@mui/material";
-import css from "./style.css"
+import css from "../../styles/global-style.css";
 import { Container } from "@mui/system";
 import { useNavigate } from "react-router-dom";
 import GoogleIcon from '@mui/icons-material/Google';

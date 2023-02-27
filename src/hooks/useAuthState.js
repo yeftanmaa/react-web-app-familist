@@ -15,18 +15,7 @@ function useAuthState() {
         setUser(null);
       }
     });
-
-    // // Sign out the user if there is one
-    // if (user) {
-    //   signOut(auth)
-    //     .then(() => {
-    //       setUser(null);
-    //     })
-    //     .catch((err) => {
-    //       alert("Error signing out: ", err);
-    //     })
-    // }
-
+    
     return unsubscribe;
   }, []);
 

@@ -3,7 +3,7 @@ import { Container } from "@mui/system";
 import { signOut } from "firebase/auth";
 import { React, useEffect, useRef, useState } from "react";
 import { auth, db } from "../../../firebase";
-import css from './style.css';
+import css from "../../styles/global-style.css";
 import { collection, getDocs, query, where } from "firebase/firestore";
 
 const Profile = () => {

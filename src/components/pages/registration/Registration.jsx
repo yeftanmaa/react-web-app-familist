@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Button, Typography, Box, TextField } from "@mui/material";
-import css from "./style.css"
+import css from "../../styles/global-style.css";
 import { Container } from "@mui/system";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "../../../firebase";
