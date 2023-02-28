@@ -3,7 +3,7 @@ import { Button, Typography, Box, TextField } from "@mui/material";
 import css from "../../styles/global-style.css";
 import { Container } from "@mui/system";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth, db } from "../../../firebase";
+import { auth, db } from "../../../config/firebase";
 import { useNavigate } from "react-router-dom";
 import { collection, addDoc } from "firebase/firestore"
 

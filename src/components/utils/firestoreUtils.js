@@ -1,4 +1,4 @@
-import { db } from "../../firebase";
+import { db } from "../../config/firebase";
 import { collection, getDocs, limit, orderBy, query, where } from "firebase/firestore";
 
 export const getAllChartDataByQuery = async (collectionName)  => {

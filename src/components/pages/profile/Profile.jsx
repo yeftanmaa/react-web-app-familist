@@ -2,7 +2,7 @@ import { TextField, Typography, Button, Box } from "@mui/material";
 import { Container } from "@mui/system";
 import { signOut } from "firebase/auth";
 import { React, useEffect, useRef, useState } from "react";
-import { auth, db } from "../../../firebase";
+import { auth, db } from "../../../config/firebase";
 import css from "../../styles/global-style.css";
 import { collection, getDocs, query, where } from "firebase/firestore";
 

@@ -2,7 +2,7 @@ import { Button, Typography } from "@mui/material";
 import { Box, Container } from "@mui/system";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import React, { useEffect, useRef, useState } from "react";
-import { auth, db } from "../../../firebase";
+import { auth, db } from "../../../config/firebase";
 import { getMonthName } from "../../utils/DateGenerator";
 import { FormatPrice } from "../../utils/PriceToString";
 import Chart from 'chart.js/auto';

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Outlet, Navigate } from 'react-router-dom'; // v4/5
 import { onAuthStateChanged  } from 'firebase/auth';
-import { auth } from '../../firebase';
+import { auth } from '../../config/firebase';
 
 const PrivateRoute = props => {
   const [pending, setPending] = useState(true);
