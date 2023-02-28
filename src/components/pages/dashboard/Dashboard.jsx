@@ -3,42 +3,90 @@ import { Box, Container } from "@mui/system";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import React, { useEffect, useRef, useState } from "react";
 import { auth, db } from "../../../firebase";
-import LineChart from "../../chart/LineChart";
-import { daysInArray, getMonthName } from "../../utils/DateGenerator";
+import { getMonthName } from "../../utils/DateGenerator";
 import { FormatPrice } from "../../utils/PriceToString";
+import Chart from 'chart.js/auto';
+import { getAllChartDataByQuery, getTodayEarningByQuery } from "../../utils/firestoreUtils";
+
 
 const Dashboard = () => {
 
-    // eslint-disable-next-line
-    const [day, setDay] = useState();
+    const chartRef = useRef(null);
+    const [chartData, setChartData] = useState([]);
+    
+    // Get chart data
+    useEffect(() => {
+        const fetchChartData = async () => {
+            const chartData = await getAllChartDataByQuery("workspace-graph");
+            setChartData(chartData);
+        };
+
+        fetchChartData();
+    }, [])
+
+    // render chart when component is mounted
+    useEffect(() => {
+        if (chartData.length) {
+            const myChart = new Chart(chartRef.current, {
+                type: 'bar',
+                data: {
+                    labels: chartData
+                    .sort((a,b) => a.createdAt.seconds - b.createdAt.seconds)
+                    .map((item) => {
+                        const dateObj =  item.createdAt.toDate();
+                        return dateObj.getDate();
+                    }),
+                    datasets: [
+                        {
+                            label: getMonthName() + " Financial Log",
+                            data: chartData.map((item) => item.totalEarnings),
+                            backgroundColor: 'rgba(255,99,132,0.2)',
+                            borderColor: 'rgba(255,99,132,1)',
+                            borderWidth: 1,
+                        },
+                    ],
+                },
+                options: {
+                    scales: {
+                        y: [
+                            {
+                                ticks: {
+                                    beginAtZero: true
+                                },
+                            }
+                        ],
+                    },
+                },
+            });
+
+            return () => {
+                myChart.destroy();
+            };
+        }
+    }, [chartData]);
+
     const currentUser = useRef(null);
     const latestEarning = useRef(0);
 
-    // Get current date with hours set to 0
-    const currentDate = new Date();
-    currentDate.setHours(0,0,0,0);
+    // Get Today Earning
+    useEffect(() => {
+        const fetchTodayEarning  = async() => {
+            const earning = await getTodayEarningByQuery('workspace-graph', 'createdAt', '<=', "desc");
+            latestEarning.current = earning;
+        };
 
-    
+        fetchTodayEarning();
+    }, []);
 
     useEffect(() => {
-        const unsusbcribe = auth.onAuthStateChanged(async (user) => {
+        const unsubscribe = auth.onAuthStateChanged(async (user) => {
             if (user) {
-                const workspaceDetails = collection(db, "workspace-graph");
+                // import our collection in firestore
+                
                 const userDetails = collection(db, "users");
 
-                // const q = query(workspaceDetails, where("token", "==", "n4th4nSpace"));
+                // get currentUser to be displayed on the bottom side of the page
                 const qUser = query(userDetails, where("email", "==", user?.email));
-                const getTodayEarnings = query(workspaceDetails, where("createdAt", ">=", currentDate));
-
-                // getDocs(q).then((querySnapshot) => {
-                //     querySnapshot.docs.forEach((doc) => {
-                //         setCurrentIncome(doc.data().totalEarnings);
-                //         setDay(doc.data().createdAt.toDate());
-                //     })
-                // }).catch((err) => {
-                //     console.log("Error getting earnings", err);
-                // });
-
                 getDocs(qUser).then((querySnapshot) => {
                     querySnapshot.docs.forEach((doc) => {
                         currentUser.current = (doc.data().email);
@@ -47,54 +95,17 @@ const Dashboard = () => {
                     console.log("Error getting earnings", err);
                 });
 
-                getDocs(getTodayEarnings).then((querySnapshot) => {
-                    if (!querySnapshot.empty) {
-                        // There is at least one document that matches query
-                        latestEarning.current = querySnapshot.docs[0].data().totalEarnings;
-                        console.log(querySnapshot.docs[0].data().totalEarnings);
-                    } else {
-                        alert("No matching earnings for today!");
-                    }
-                })
-
             } else {
                 console.log("Error of auth!");
             }
         })
 
-        return unsusbcribe;
-    })
-
-    // configure userData to be displayed in chart
-    const [userData] = useState({
-        labels: daysInArray,
-        datasets: [{
-            label: getMonthName() + ' Incomes & Expenses',  
-            data: [10706, 12847, 11516, 10464, 10707, 10706, 12847, 11516, 10464, 11723, 11923, 11922, 11922, 11922, 12012, 11912, 10900, 10705, 10238, 10353, 10353, 11012, 11000, 12000, 12000, 12000],
-            borderColor: "rgb(255,99,132)",
-            backgroundColor: "rgba(255,99,132, 0.5)",
-            pointStyle: 'circle',
-            pointRadius: 10,
-            pointHoverRadius: 15
-        }]
-    })
-
-    const [userDataOptions] = useState({
-        responsive: true,
-        scales: {
-            y: {
-                ticks: {
-                    beginAtZero: true,
-                    steps: 10,
-                    stepValue: 10,
-                    max: 100
-                }
-            }
-        },
+        return unsubscribe;
     })
 
     return (
         <div>
+            
             <Container maxWidth="lg">
 
                 <Box display={"flex"} justifyContent={"space-between"} alignItems={"center"} marginTop={"20px"} >
@@ -103,12 +114,12 @@ const Dashboard = () => {
                         <Typography variant="h2" fontWeight={600} fontStyle={"normal"} color={"#1E8CF1"}>{FormatPrice(latestEarning.current)}</Typography>
                     </Box>
 
-                    <Button variant="contained" color="primary" sx={{padding: '5px 30px', borderRadius: '7px'}}>Add new earnings</Button>
+                    <Button variant="contained" color="primary" sx={{padding: '5px 30px', borderRadius: '7px'}}>Add Income</Button>
                 </Box>
 
-                <Box marginTop={"20px"}>
-                    <LineChart chartData={userData} chartOptions={userDataOptions} />
-                </Box>
+                <div style={{width: "95 %", marginTop: "30px", marginLeft: 'auto', marginRight: 'auto'}}>
+                    <canvas ref={chartRef} />
+                </div>
 
                 <div style={{display: 'flex', justifyContent: 'center'}}>
                     <p style={{ fontSize: 14, position: 'fixed', bottom: 37}}>{currentUser.current === null ? "" : "Logged in as: " + currentUser.current} </p>

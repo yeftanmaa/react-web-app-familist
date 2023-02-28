@@ -10,7 +10,6 @@ import TabsComponent from './components/TabsComponent';
 import Dashboard from './components/pages/dashboard/Dashboard';
 import Scheduler from './components/pages/scheduler/Scheduler';
 import LiveBoard from './components/pages/live-board/LiveBoard';
-
 // firebase import
 import handleSubmit from './handler/handleSubmit';
 import { useRef } from 'react';
