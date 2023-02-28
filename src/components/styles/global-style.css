@@ -28,6 +28,12 @@
     bottom: 7%;
 }
 
+.box-income-modal {
+    display: flex;
+    gap: 7px;
+    margin-top: 20px;
+}
+
 .profile-details {
     display: block;
     margin: 10px 0;
@@ -35,4 +41,8 @@
 
 .btn-group {
     width: 100px;
+}
+
+.btn-group-income-modal {
+    width: 100%;
 }

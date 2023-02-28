@@ -1,5 +1,5 @@
 import { db } from "../../config/firebase";
-import { collection, getDocs, limit, orderBy, query, where } from "firebase/firestore";
+import { collection, getDocs, limit, orderBy, query, where, Timestamp } from "firebase/firestore";
 
 export const getAllChartDataByQuery = async (collectionName)  => {
     
@@ -10,12 +10,12 @@ export const getAllChartDataByQuery = async (collectionName)  => {
 export const getTodayEarningByQuery = async (collectionName, field, operator, sortBy) => {
     let latestEarning = 0;
     
-    const currentDate = new Date();
-    currentDate.setHours(0,0,0,0);
+    // const currentDate = new Date();
+    // currentDate.setHours(0,0,0,0);
 
     const workspaceRef = collection(db, collectionName);
 
-    const getTodayEarning = query(workspaceRef, where(field, operator, currentDate), orderBy(field, sortBy), limit(1));
+    const getTodayEarning = query(workspaceRef, where(field, operator, Timestamp.fromDate(new Date())), orderBy(field, sortBy), limit(1));
     const querySnapshot = await getDocs(getTodayEarning);
 
     if (!querySnapshot.empty) {

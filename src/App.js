@@ -10,9 +10,6 @@ import TabsComponent from './components/TabsComponent';
 import Dashboard from './components/pages/dashboard/Dashboard';
 import Scheduler from './components/pages/scheduler/Scheduler';
 import LiveBoard from './components/pages/live-board/LiveBoard';
-// firebase import
-import handleSubmit from './handler/handleSubmit';
-import { useRef } from 'react';
 
 // route import
 import PrivateRoute from './components/routes/PrivateRoute';
@@ -52,14 +49,6 @@ const theme = createTheme({
 
 function App() {
 
-  const dataRef = useRef()
-
-  const submithandler = (e) => {
-    e.preventDefault();
-    handleSubmit(dataRef.current.value);
-    dataRef.current.value = "";
-  }
-
   return (
     <ThemeProvider theme={theme}>
       <BrowserRouter>
@@ -75,16 +64,6 @@ function App() {
             <Route path='/live-board' element={<LiveBoard />} />
             <Route path='/scheduler' element={<Scheduler />} />
           </Route>
-
-          <Route path='/test' element = {
-            <div>
-              <form onSubmit={submithandler}>
-                <input type="text" ref={dataRef} />
-                <button type='submit'>Save</button>
-              </form>
-            </div>
-          }
-          ></Route>
 
         </Routes>
       </BrowserRouter>

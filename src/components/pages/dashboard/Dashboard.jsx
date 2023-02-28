@@ -7,6 +7,7 @@ import { getMonthName } from "../../utils/DateGenerator";
 import { FormatPrice } from "../../utils/PriceToString";
 import Chart from 'chart.js/auto';
 import { getAllChartDataByQuery, getTodayEarningByQuery } from "../../utils/firestoreUtils";
+import ModalAddIncome from "../../modals/AddIncome";
 
 
 const Dashboard = () => {
@@ -40,8 +41,8 @@ const Dashboard = () => {
                         {
                             label: getMonthName() + " Financial Log",
                             data: chartData.map((item) => item.totalEarnings),
-                            backgroundColor: 'rgba(255,99,132,0.2)',
-                            borderColor: 'rgba(255,99,132,1)',
+                            backgroundColor: 'rgb(8, 143, 143, 0.2)',
+                            borderColor: 'rgb(8, 143, 143)',
                             borderWidth: 1,
                         },
                     ],
@@ -103,6 +104,16 @@ const Dashboard = () => {
         return unsubscribe;
     })
 
+    const [open, setOpen] = useState(false);
+    
+    const handleOpenModal = () => {
+        setOpen(true);
+    }
+
+    const handleCloseModal = () => {
+        setOpen(false);
+    }
+
     return (
         <div>
             
@@ -114,7 +125,9 @@ const Dashboard = () => {
                         <Typography variant="h2" fontWeight={600} fontStyle={"normal"} color={"#1E8CF1"}>{FormatPrice(latestEarning.current)}</Typography>
                     </Box>
 
-                    <Button variant="contained" color="primary" sx={{padding: '5px 30px', borderRadius: '7px'}}>Add Income</Button>
+                    <Button onClick={handleOpenModal} variant="contained" color="primary" sx={{padding: '5px 30px', borderRadius: '7px'}}>Add Income</Button>
+
+                    {open && <ModalAddIncome open={open} handleClose={handleCloseModal} onCloseClick={handleCloseModal} getLatestEarning={latestEarning.current} />}
                 </Box>
 
                 <div style={{width: "95 %", marginTop: "30px", marginLeft: 'auto', marginRight: 'auto'}}>

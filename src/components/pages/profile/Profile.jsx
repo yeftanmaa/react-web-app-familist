@@ -91,8 +91,8 @@ const Profile = () => {
                     </div>                        
 
                     <Box className="box" sx={css}>
-                        <Button className="btn-group" sx={css} color="primary" disabled={workspaceName === '' || workspaceName === getDataName.current} variant="contained" disableElevation>Edit</Button>
-                        <Button onClick={handleLogout} className="btn-group" sx={css} color="cancel" variant="contained" disableElevation href="/">Logout</Button>
+                        <Button className="btn-group" sx={css} color="primary" disabled={workspaceName === '' || workspaceName === getDataName.current} variant="contained">Edit</Button>
+                        <Button onClick={handleLogout} className="btn-group" sx={css} color="cancel" variant="contained" href="/">Logout</Button>
                     </Box>
 
                     <p style={{opacity: 0.3, position: 'fixed', bottom: 0}}>Copyright 2023. Thesis Project Purposes.</p>
