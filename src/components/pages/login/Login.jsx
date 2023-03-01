@@ -51,7 +51,7 @@ const Login = () => {
 
             <Container>
                 <div className="regis-box" style={css}>
-                    <Typography variant="h4" sx={{marginBottom: '10px'}}>Sign In</Typography>
+                    <Typography variant="h4" fontWeight={500} sx={{marginBottom: '10px'}}>Sign In</Typography>
 
                     {/* Email Input */}
                     <Box>
@@ -101,7 +101,7 @@ const Login = () => {
                         <Button onClick={signInWithGoogle} variant="contained" color="secondary" sx={{width: '150px'}} startIcon={<GoogleIcon />}>Use Google</Button>
                     </Box>
                     
-                    <Link sx={{fontSize: '15px', marginTop: '10px', cursor: "pointer"}}>Forgot password?</Link>
+                    <Link sx={{fontSize: '15px', marginTop: '10px', cursor: "pointer", fontWeight: 400}}>Forgot password?</Link>
 
                     <p style={{opacity: 0.3, position: 'fixed', bottom: 0}}>Copyright 2023. Thesis Project Purposes.</p>
                 </div>

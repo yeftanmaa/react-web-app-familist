@@ -50,7 +50,7 @@ const Profile = () => {
         <div>
             <Container>
                 <div className="profile-box" style={css}>
-                    <Typography variant="h3" marginBottom={2}>Profile</Typography>
+                    <Typography variant="h3" fontWeight={500} marginBottom={2}>Profile</Typography>
                     
                     <div className="profile-details" style={css}>
                         <Typography variant="body">Workspace Name:</Typography>

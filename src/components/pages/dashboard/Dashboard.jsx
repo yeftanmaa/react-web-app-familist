@@ -50,13 +50,16 @@ const Dashboard = () => {
                 },
                 options: {
                     scales: {
-                        y: [
-                            {
-                                ticks: {
-                                    beginAtZero: true
-                                },
+                        y: {
+                            beginAtZero: true
+                        },
+                        
+                        x: {
+                            grid: {
+                                display : false
                             }
-                        ],
+                            
+                        }
                     },
                 },
             });

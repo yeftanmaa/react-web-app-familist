@@ -65,7 +65,7 @@ const Registration = () => {
 
             <Container>
                 <div className="regis-box" style={css}>
-                    <Typography variant="h4" sx={{marginBottom: '10px'}}>Registration</Typography>
+                    <Typography variant="h4" fontWeight={500} sx={{marginBottom: '10px'}}>Registration</Typography>
 
                     {/* Name Input */}
                     <Box>

@@ -19,6 +19,9 @@ import PrivateRoute from './components/routes/PrivateRoute';
 const theme = createTheme({
   typography: {
     fontFamily: 'Inter, sans-serif',
+    fontWeightRegular: 400,
+    fontWeightMedium: 500,
+    fontWeightBold: 600,
     allVariants: {
       textTransform: 'none',
       letterSpacing: '0px',
