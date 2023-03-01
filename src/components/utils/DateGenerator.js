@@ -17,12 +17,3 @@ export function getMonthName() {
 
     return monthNames[currentDate.getMonth()];
 }
-
-export function FormattedFirstDayCurrentMonth() {
-    const now = new Date();
-    const currentMonth = now.getMonth() + 1; // add 1 because getMonth() returns a zero-based index
-    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const formattedDate = `${firstDayOfMonth.getFullYear()}-${currentMonth.toString().padStart(2, '0')}-01T00:00:00.000Z`;
-
-    return formattedDate;
-}

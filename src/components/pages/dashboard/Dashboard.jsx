@@ -126,7 +126,7 @@ const Dashboard = () => {
                         <Typography variant="h2" fontWeight={600} fontStyle={"normal"} color={"#1E8CF1"}>{FormatPrice(latestEarning.current)}</Typography>
                     </Box>
 
-                    <Button startIcon={<AddIcon />} onClick={handleOpenModal} variant="contained" color="primary" sx={{padding: '5px 30px', borderRadius: '7px'}}>Add Income</Button>
+                    <Button startIcon={<AddIcon />} onClick={handleOpenModal} variant="contained" color="primary" sx={{padding: '5px 15px', borderRadius: '7px'}}>Add Income</Button>
 
                     {open && <ModalAddIncome open={open} handleClose={handleCloseModal} onCloseClick={handleCloseModal} getLatestEarning={latestEarning.current} />}
                 </Box>
