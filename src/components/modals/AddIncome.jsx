@@ -24,7 +24,7 @@ const ModalAddIncome = ({open, handleClose, onCloseClick, getLatestEarning}) => 
     const workspaceRef = collection(db, "workspace-graph");
 
     const HandleSave = async() => {
-        // now allowing empty earning input
+        // not allowing empty earning input
         if (income === "") {
             alert("Income is mandatory!");
         } else {

@@ -108,14 +108,14 @@ const Dashboard = () => {
         return unsubscribe;
     })
 
-    const [open, setOpen] = useState(false);
+    const [openModal, setOpenModal] = useState(false);
     
     const handleOpenModal = () => {
-        setOpen(true);
+        setOpenModal(true);
     }
 
     const handleCloseModal = () => {
-        setOpen(false);
+        setOpenModal(false);
     }
 
     return (
@@ -131,7 +131,7 @@ const Dashboard = () => {
 
                     <Button startIcon={<AddIcon />} onClick={handleOpenModal} variant="contained" color="primary" sx={{padding: '5px 15px', borderRadius: '7px'}}>Add Income</Button>
 
-                    {open && <ModalAddIncome open={open} handleClose={handleCloseModal} onCloseClick={handleCloseModal} getLatestEarning={latestEarning.current} />}
+                    {openModal && <ModalAddIncome open={openModal} handleClose={handleCloseModal} onCloseClick={handleCloseModal} getLatestEarning={latestEarning.current} />}
                 </Box>
 
                 <div style={{width: "95 %", marginTop: "30px", marginLeft: 'auto', marginRight: 'auto'}}>

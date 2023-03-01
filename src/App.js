@@ -38,6 +38,13 @@ const theme = createTheme({
         },
       },
     },
+    MuiTableCell: {
+        styleOverrides: {
+          root: {
+            borderBottom: "none"
+          },
+        },
+    },
   },
   palette: {
     primary: {
