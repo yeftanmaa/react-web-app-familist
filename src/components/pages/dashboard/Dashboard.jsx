@@ -8,6 +8,7 @@ import { FormatPrice } from "../../utils/PriceToString";
 import Chart from 'chart.js/auto';
 import { getAllChartDataByQuery, getTodayEarningByQuery } from "../../utils/firestoreUtils";
 import ModalAddIncome from "../../modals/AddIncome";
+import AddIcon from '@mui/icons-material/Add';
 
 
 const Dashboard = () => {
@@ -125,7 +126,7 @@ const Dashboard = () => {
                         <Typography variant="h2" fontWeight={600} fontStyle={"normal"} color={"#1E8CF1"}>{FormatPrice(latestEarning.current)}</Typography>
                     </Box>
 
-                    <Button onClick={handleOpenModal} variant="contained" color="primary" sx={{padding: '5px 30px', borderRadius: '7px'}}>Add Income</Button>
+                    <Button startIcon={<AddIcon />} onClick={handleOpenModal} variant="contained" color="primary" sx={{padding: '5px 30px', borderRadius: '7px'}}>Add Income</Button>
 
                     {open && <ModalAddIncome open={open} handleClose={handleCloseModal} onCloseClick={handleCloseModal} getLatestEarning={latestEarning.current} />}
                 </Box>

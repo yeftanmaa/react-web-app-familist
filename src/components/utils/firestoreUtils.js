@@ -2,16 +2,22 @@ import { db } from "../../config/firebase";
 import { collection, getDocs, limit, orderBy, query, where, Timestamp } from "firebase/firestore";
 
 export const getAllChartDataByQuery = async (collectionName)  => {
+    // Get the start of current month
+    const currentDate = new Date();
+    const startOfTheMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+
+    // Get the end of current month
+    const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0, 23, 59, 59);
     
-    const querySnapshot = await getDocs(collection(db, collectionName));
+    const querySnapshot = await getDocs(
+       query(collection(db, collectionName), where('createdAt', '>=', startOfTheMonth), where('createdAt', '<=', endOfMonth))
+    );
+    
     return querySnapshot.docs.map((doc) => ({ ...doc.data() }));
 };
 
 export const getTodayEarningByQuery = async (collectionName, field, operator, sortBy) => {
     let latestEarning = 0;
-    
-    // const currentDate = new Date();
-    // currentDate.setHours(0,0,0,0);
 
     const workspaceRef = collection(db, collectionName);
 

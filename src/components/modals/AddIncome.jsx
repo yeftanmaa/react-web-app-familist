@@ -37,7 +37,9 @@ const ModalAddIncome = ({open, handleClose, onCloseClick, getLatestEarning}) => 
                 });
 
                 // confirm if data successfully saved
-                alert("Data saved!");
+                alert("Data saved!", handleClose);
+                handleClose();
+                window.location.reload();
             } catch(err) {
                 console.error("Error!", err);
             };
