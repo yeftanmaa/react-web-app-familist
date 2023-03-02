@@ -41,6 +41,13 @@
     justify-content: center;
 }
 
+.box-detail-scheduler {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    justify-content: flex-start;
+}
+
 .profile-details {
     display: block;
     margin: 10px 0;

@@ -1,4 +1,4 @@
-import { IconButton, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, TablePagination } from "@mui/material";
+import { IconButton, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, TablePagination, Link } from "@mui/material";
 import { Box, Container } from "@mui/system";
 import React, { useEffect, useState } from "react";
 import AddIcon from '@mui/icons-material/Add'
@@ -8,6 +8,7 @@ import ModalAddScheduler from "../../modals/AddScheduler";
 import { getAllSchedulerData } from "../../utils/firestoreUtils";
 import ModalDeleteScheduler from "../../modals/DeleteScheduler";
 import ModalEditScheduler from "../../modals/EditScheduler";
+import ModalSchedulerDetails from "../../modals/SchedulerDetails";
 
 const Scheduler = () => {
 
@@ -25,6 +26,7 @@ const Scheduler = () => {
     const [openModal, setOpenModal] = useState(false);
     const [openDeleteModal, setOpenDeleteModal] = useState(false);
     const [openEditModal, setOpenEditModal] = useState(false);
+    const [openDetailModal, setOpenDetailModal] = useState(false);
     const [selectDocumentId, setSelectDocumentId] = useState('');
     const [selectSchedulerTitle, setSelectSchedulerTitle] = useState('');
     const [selectSchedulerDesc, setSelectSchedulerDesc] = useState('');
@@ -57,6 +59,17 @@ const Scheduler = () => {
 
     const handleCloseEditModal = () => {
         setOpenEditModal(false);
+    }
+
+    const handleOpenDetailModal = (desc, title, type) => {
+        setOpenDetailModal(true);
+        setSelectSchedulerDesc(desc);
+        setSelectSchedulerTitle(title);
+        setSelectSchedulerType(type);
+    }
+
+    const handleCloseDetailModal = () => {
+        setOpenDetailModal(false);
     }
 
     // Pagination config
@@ -100,7 +113,7 @@ const Scheduler = () => {
                                 : schedulerData
                             ).map((item) => (
                                 <TableRow key={item.id}>
-                                    <TableCell>{item.title}</TableCell>
+                                    <TableCell><Link component="button" sx={{fontWeight: 500, fontSize: 15, textDecoration: 'none', color: '#0047FF'}} onClick={() => {handleOpenDetailModal(item.desc, item.title, item.type, item.id)}}>{item.title}</Link></TableCell>
                                     <TableCell>Active</TableCell>
                                     <TableCell>{item.type}</TableCell>
 
@@ -116,6 +129,19 @@ const Scheduler = () => {
                                     </TableCell>
                                 </TableRow>
                             ))}
+                            {openDetailModal &&
+                                (<ModalSchedulerDetails
+                                    open={openDetailModal}
+                                    handleClose={handleCloseDetailModal}
+                                    onCloseClick={handleCloseDetailModal}
+                                    title={selectSchedulerTitle}
+                                    desc={selectSchedulerDesc}
+                                    type={selectSchedulerType}
+                                />
+                                )
+
+                            }
+
                             {openDeleteModal &&
                                 (<ModalDeleteScheduler
                                     open={openDeleteModal}
