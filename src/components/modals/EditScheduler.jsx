@@ -1,6 +1,6 @@
 import { Button, FormControl, InputLabel, MenuItem, Modal, Select, TextField, Typography } from "@mui/material";
 import { Box } from "@mui/system";
-import { addDoc, collection, Timestamp } from "firebase/firestore";
+import { Timestamp, updateDoc, doc } from "firebase/firestore";
 import React, { useState } from "react";
 import { db } from "../../config/firebase";
 import css from "../styles/global-style.css"
@@ -17,37 +17,30 @@ const style = {
     p: 4,
 };
 
-const ModalAddScheduler = ({open, handleClose, onCloseClick}) => {
+const ModalEditScheduler = ({open, handleClose, onCloseClick, desc, title, type, id}) => {
 
-    const [schedulerTitle, setSchedulerTitle] = useState('');
-    const [schedulerType, setSchedulerType] = useState('');
-    const [schedulerDesc, setSchedulerDesc] = useState('');
-    const schedulerRef = collection(db, "scheduler");
+    const [getDesc, setDesc] = useState(desc);
+    const [getTitle, setTitle] = useState(title);
+    const [getType, setType] = useState(type);
 
-    const HandleSave = async() => {
-        // not allowing empty title neither type
-        if (schedulerTitle === "") {
-            alert('Scheduler title is mandatory!');
-        } else if (schedulerType === "") {
-            alert('Scheduler type is mandatory!');
-        } else {
-            try {
-                await addDoc(schedulerRef, {
-                    createdAt: Timestamp.fromDate(new Date()),
-                    title: schedulerTitle,
-                    desc: schedulerDesc,
-                    type: schedulerType
-                });
+    const EditScheduler = async () => {
+        const schedulerRef = doc(db, 'scheduler', id);
+        const newValue = {
+            createdAt: Timestamp.fromDate(new Date()),
+            desc: getDesc,
+            title: getTitle,
+            type: getType
+        }
 
-                // confirm if data successfully saved
-                alert("Data saved!", handleClose);
-                handleClose();
-                window.location.reload();
-            } catch(err) {
-                console.error("Error!", err);
-            };
-        };
-    };
+        try {
+            updateDoc(schedulerRef, newValue);
+            alert("Scheduler updated!");
+            handleClose();
+            window.location.reload();
+        } catch(err) {
+            console.error("Error!", err);
+        }
+    }
 
     return (
         <Modal
@@ -55,7 +48,7 @@ const ModalAddScheduler = ({open, handleClose, onCloseClick}) => {
             onClose={handleClose}
         >
             <Box sx={style}>
-                <Typography variant="h4" sx={{textAlign: 'center', fontWeight: '500', fontSize: 30}}>New Scheduler</Typography>
+                <Typography variant="h4" sx={{textAlign: 'center', fontWeight: '500', fontSize: 30}}>Edit Scheduler</Typography>
 
                 <TextField
                     label="Title"
@@ -63,8 +56,9 @@ const ModalAddScheduler = ({open, handleClose, onCloseClick}) => {
                     sx={{ marginTop: '25px', marginBottom: '15px'}}
                     fullWidth
                     type="text"
+                    value={getTitle}
+                    onChange={(e) => setTitle(e.target.value)}
                     size="small"
-                    onChange={(e) => setSchedulerTitle(e.target.value)}
                     placeholder="Name of this scheduler"
                     InputProps={{
                         style: {fontSize: 15}
@@ -73,10 +67,11 @@ const ModalAddScheduler = ({open, handleClose, onCloseClick}) => {
 
                 <TextField
                     id="outlined-multiline-static"
-                    onChange={(e) => setSchedulerDesc(e.target.value)}
                     label="Description"
                     type="text"
                     multiline
+                    value={getDesc}
+                    onChange={(e) => setDesc(e.target.value)}
                     rows={4}
                     size="small"
                     fullWidth
@@ -90,8 +85,9 @@ const ModalAddScheduler = ({open, handleClose, onCloseClick}) => {
                         labelId="select-schedule-type-label"
                         id="select-schedule-type"
                         label="Scheduler Type"
-                        value={schedulerType}
-                        onChange={(e) => setSchedulerType(e.target.value)}
+                        value={getType}
+                        displayEmpty
+                        onChange={(e) => setType(e.target.value)}
                     >
                         <MenuItem value="Tagihan bulanan">Monthly</MenuItem>
                         <MenuItem value="Tagihan tahunan">Annual</MenuItem>
@@ -99,7 +95,7 @@ const ModalAddScheduler = ({open, handleClose, onCloseClick}) => {
                 </FormControl>
 
                 <Box className="box-income-modal" sx={css}>
-                    <Button onClick={HandleSave} className="btn-group-income-modal" sx={css} color="primary" variant="contained">Create</Button>
+                    <Button onClick={EditScheduler} className="btn-group-income-modal" sx={css} color="primary" variant="contained">Save changes</Button>
                     <Button onClick={onCloseClick} className="btn-group-income-modal" sx={css} color="cancel" variant="outlined">Cancel</Button>
                 </Box>
             </Box>
@@ -107,4 +103,4 @@ const ModalAddScheduler = ({open, handleClose, onCloseClick}) => {
     );
 }
  
-export default ModalAddScheduler;
+export default ModalEditScheduler;

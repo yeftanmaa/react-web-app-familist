@@ -20,12 +20,13 @@ const style = {
 const ModalDeleteScheduler = ({open, handleClose, onCloseClick, docID}) => {
 
     const deleteScheduler = async () => {
-        const schedulerDoc = doc(db, 'scheduler', docID);
+        const schedulerRef = doc(db, 'scheduler', docID);
 
         try {   
-            await deleteDoc(schedulerDoc);
+            await deleteDoc(schedulerRef);
             alert("Scheduler deleted!");
             handleClose();
+            window.location.reload();
         } catch(err) {
             console.error("Error!", err);
         }

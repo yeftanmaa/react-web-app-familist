@@ -7,6 +7,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import ModalAddScheduler from "../../modals/AddScheduler";
 import { getAllSchedulerData } from "../../utils/firestoreUtils";
 import ModalDeleteScheduler from "../../modals/DeleteScheduler";
+import ModalEditScheduler from "../../modals/EditScheduler";
 
 const Scheduler = () => {
 
@@ -23,7 +24,11 @@ const Scheduler = () => {
 
     const [openModal, setOpenModal] = useState(false);
     const [openDeleteModal, setOpenDeleteModal] = useState(false);
+    const [openEditModal, setOpenEditModal] = useState(false);
     const [selectDocumentId, setSelectDocumentId] = useState('');
+    const [selectSchedulerTitle, setSelectSchedulerTitle] = useState('');
+    const [selectSchedulerDesc, setSelectSchedulerDesc] = useState('');
+    const [selectSchedulerType, setSelectSchedulerType] = useState('');
 
     const handleOpenModal = () => {
         setOpenModal(true);
@@ -42,6 +47,19 @@ const Scheduler = () => {
         setOpenDeleteModal(false);
     }
 
+    const handleOpenEditModal = (desc, title, type, id) => {
+        setOpenEditModal(true);
+        setSelectSchedulerDesc(desc);
+        setSelectSchedulerTitle(title);
+        setSelectSchedulerType(type);
+        setSelectDocumentId(id);
+    }
+
+    const handleCloseEditModal = () => {
+        setOpenEditModal(false);
+    }
+
+    // Pagination config
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
 
@@ -87,7 +105,7 @@ const Scheduler = () => {
                                     <TableCell>{item.type}</TableCell>
 
                                     <TableCell align="center">
-                                        <IconButton size="large">
+                                        <IconButton onClick={() => handleOpenEditModal(item.desc, item.title, item.type, item.id)} size="large">
                                             <EditIcon color="primary" />
                                         </IconButton>
 
@@ -98,7 +116,27 @@ const Scheduler = () => {
                                     </TableCell>
                                 </TableRow>
                             ))}
-                            {openDeleteModal && (<ModalDeleteScheduler open={openDeleteModal} handleClose={handleCloseDeleteModal} onCloseClick={handleCloseDeleteModal} docID={selectDocumentId}  />) }
+                            {openDeleteModal &&
+                                (<ModalDeleteScheduler
+                                    open={openDeleteModal}
+                                    handleClose={handleCloseDeleteModal}
+                                    onCloseClick={handleCloseDeleteModal}
+                                    docID={selectDocumentId} 
+                                />)
+                            }
+
+                            {openEditModal &&
+                                (<ModalEditScheduler
+                                    open={openEditModal}
+                                    handleClose={handleCloseEditModal}
+                                    onCloseClick={handleCloseEditModal}
+                                    title={selectSchedulerTitle}
+                                    desc={selectSchedulerDesc}
+                                    type={selectSchedulerType}
+                                    id={selectDocumentId}
+                                />)
+                            }
+
                         </TableBody>
                     </Table>
 
@@ -112,6 +150,10 @@ const Scheduler = () => {
                         onRowsPerPageChange={handleChangeRowsPerPage}
                     />
                 </TableContainer>
+
+                <div style={{display: 'flex', justifyContent: 'center'}}>
+                    <p style={{opacity: 0.3, position: 'fixed', bottom: 10}}>Copyright 2023. Thesis Project Purposes.</p>
+                </div>
             </Container>
         </div>
     );
