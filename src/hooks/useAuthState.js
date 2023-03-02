@@ -1,6 +1,5 @@
-import { signOut } from 'firebase/auth';
 import { useState, useEffect } from 'react';
-import { auth } from '../firebase'
+import { auth } from '../config/firebase';
 
 function useAuthState() {
   const [user, setUser] = useState(null);
@@ -9,7 +8,6 @@ function useAuthState() {
     // Check if there is a user signed in
     const unsubscribe = auth.onAuthStateChanged((authUser) => {
       if (authUser) {
-        signOut(auth);
         setUser(null);
       } else {
         setUser(null);
