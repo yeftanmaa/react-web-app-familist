@@ -34,9 +34,10 @@ export const getTodayEarningByQuery = async (collectionName, field, operator, so
 };
 
 export const getAllSchedulerData = async () => {
-    const getSchedulerData = await getDocs(
-        collection(db, 'scheduler')
-    );
 
-    return getSchedulerData.docs.map((doc) => ({ ...doc.data()}))
+    const schedulerRef = collection(db, 'scheduler');
+
+    const getSchedulerData = await getDocs(schedulerRef);
+
+    return getSchedulerData.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
 }

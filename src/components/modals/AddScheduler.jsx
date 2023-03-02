@@ -92,8 +92,8 @@ const ModalAddScheduler = ({open, handleClose, onCloseClick}) => {
                         value={schedulerType}
                         onChange={(e) => setSchedulerType(e.target.value)}
                     >
-                        <MenuItem value="Monthly">Monthly</MenuItem>
-                        <MenuItem value="Annual">Annual</MenuItem>
+                        <MenuItem value="Tagihan bulanan">Monthly</MenuItem>
+                        <MenuItem value="Tagihan tahunan">Annual</MenuItem>
                     </Select>
                 </FormControl>
 

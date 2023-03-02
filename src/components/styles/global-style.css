@@ -34,6 +34,13 @@
     margin-top: 20px;
 }
 
+.box-delete-scheduler {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    justify-content: center;
+}
+
 .profile-details {
     display: block;
     margin: 10px 0;
@@ -45,4 +52,8 @@
 
 .btn-group-income-modal {
     width: 100%;
+}
+
+.btn-group-delete-scheduler {
+    width: 25%;
 }
