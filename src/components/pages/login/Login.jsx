@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
-import { auth, googleProvider } from "../../../config/firebase";
+import { auth, db, googleProvider } from "../../../config/firebase";
 import { Button, Typography, Box, TextField, Link } from "@mui/material";
 import css from "../../styles/global-style.css";
 import { Container } from "@mui/system";
 import { useNavigate } from "react-router-dom";
 import GoogleIcon from '@mui/icons-material/Google';
+import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
 
 const Login = () => {
-
     const navigate = useNavigate();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -32,7 +32,22 @@ const Login = () => {
 
     const signInWithGoogle = async () => {
         try {
-            await signInWithPopup(auth, googleProvider);
+            const result = await signInWithPopup(auth, googleProvider);
+
+            // save email to database if not exist
+            const userCollectionRef = collection(db, "users");
+
+            const q = query(userCollectionRef, where("email", "==", result.user.email));
+            const querySnapshot = await getDocs(q);
+
+            if (querySnapshot.empty) {
+                await addDoc(userCollectionRef, {
+                    name: result.user.displayName,
+                    email: result.user.email
+                })
+            };
+
+            navigate("/dashboard");
         } catch (err) {
             alert(err);
         }

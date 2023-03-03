@@ -71,13 +71,13 @@ const Dashboard = () => {
     }, [chartData]);
 
     const currentUser = useRef(null);
-    const latestEarning = useRef(0);
+    const [latestEarning, setLatestEarning] = useState(0);
 
     // Get Today Earning
     useEffect(() => {
         const fetchTodayEarning  = async() => {
             const earning = await getTodayEarningByQuery('workspace-graph', 'createdAt', '<=', "desc");
-            latestEarning.current = earning;
+            setLatestEarning(earning);
         };
 
         fetchTodayEarning();
@@ -97,7 +97,7 @@ const Dashboard = () => {
                         currentUser.current = (doc.data().email);
                     })
                 }).catch((err) => {
-                    console.log("Error getting earnings", err);
+                    console.log("Error getting emails!", err);
                 });
 
             } else {
@@ -126,12 +126,12 @@ const Dashboard = () => {
                 <Box display={"flex"} justifyContent={"space-between"} alignItems={"center"} marginTop={"20px"} >
                     <Box>
                         <Typography variant="h6" fontWeight={400}>Current total earnings:</Typography>
-                        <Typography variant="h2" fontWeight={600} fontStyle={"normal"} color={"#1E8CF1"}>{FormatPrice(latestEarning.current)}</Typography>
+                        <Typography variant="h2" fontWeight={600} fontStyle={"normal"} color={"#1E8CF1"}>{FormatPrice(latestEarning)}</Typography>
                     </Box>
 
                     <Button startIcon={<AddIcon />} onClick={handleOpenModal} variant="contained" color="primary" sx={{padding: '5px 15px', borderRadius: '7px'}}>Add Income</Button>
 
-                    {openModal && <ModalAddIncome open={openModal} handleClose={handleCloseModal} onCloseClick={handleCloseModal} getLatestEarning={latestEarning.current} />}
+                    {openModal && <ModalAddIncome open={openModal} handleClose={handleCloseModal} onCloseClick={handleCloseModal} getLatestEarning={latestEarning} />}
                 </Box>
 
                 <div style={{width: "95 %", marginTop: "30px", marginLeft: 'auto', marginRight: 'auto'}}>

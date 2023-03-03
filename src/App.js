@@ -13,10 +13,6 @@ import LiveBoard from './components/pages/live-board/LiveBoard';
 
 // route import
 import PrivateRoute from './components/routes/PrivateRoute';
-import { getAuth, signOut } from "firebase/auth";
-import { useEffect } from "react";
-
-const auth = getAuth();
 
 // make all mui typography components is lowercase
 const theme = createTheme({
@@ -61,14 +57,6 @@ const theme = createTheme({
 });
 
 function App() {
-
-  useEffect(() => {
-    signOut(auth).then(() => {
-    }).catch((error) => {
-      alert("Error signing out:", error);
-    });
-  }, []);
-
   return (
     <ThemeProvider theme={theme}>
       <BrowserRouter>

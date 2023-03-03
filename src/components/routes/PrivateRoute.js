@@ -7,6 +7,7 @@ const PrivateRoute = props => {
   const [pending, setPending] = useState(true);
   const [currentUser, setCurrentUser] = useState();
 
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(
       auth,
