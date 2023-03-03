@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import { sendPasswordResetEmail, signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { auth, db, googleProvider } from "../../../config/firebase";
 import { Button, Typography, Box, TextField, Link } from "@mui/material";
 import css from "../../styles/global-style.css";
@@ -53,6 +53,15 @@ const Login = () => {
         }
     }
 
+    const TriggerResetEmail = async () => {
+        try {
+            await sendPasswordResetEmail(auth, email);
+            alert("Password reset email sent!");
+        } catch(err) {
+            alert("Please provide correct email!");
+        }
+        
+    }
     return (
         <div>
             <div className="navbar" style={css}>
@@ -116,11 +125,11 @@ const Login = () => {
                         <Button onClick={signInWithGoogle} variant="contained" color="secondary" sx={{width: '150px'}} startIcon={<GoogleIcon />}>Use Google</Button>
                     </Box>
                     
-                    <Link sx={{fontSize: '15px', marginTop: '10px', cursor: "pointer", fontWeight: 400}}>Forgot password?</Link>
+                    <Link onClick={TriggerResetEmail} sx={{fontSize: '15px', marginTop: '10px', cursor: "pointer", fontWeight: 400}}>Forgot password?</Link>
 
                     <p style={{opacity: 0.3, position: 'fixed', bottom: 0}}>Copyright 2023. Thesis Project Purposes.</p>
                 </div>
-            </Container>
+            </Container>    
             
         </div>
     );

@@ -1,18 +1,19 @@
 import React, { useState } from "react";
-import { Button, Typography, Box, TextField } from "@mui/material";
+import { Button, Typography, Box, TextField, Snackbar } from "@mui/material";
 import css from "../../styles/global-style.css";
 import { Container } from "@mui/system";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "../../../config/firebase";
 import { useNavigate } from "react-router-dom";
-import { collection, addDoc } from "firebase/firestore"
+import { collection, addDoc } from "firebase/firestore";
+import { GenerateToken } from "../../utils/tokenGenerator";
 
 const Registration = () => {
 
     // navigation component
     const navigate = useNavigate();
 
-    // 
+    const [getToken, setToken] = useState("");
     const [newName, setNewName] = useState("");
     const [newEmail, setNewEmail] = useState("");
     const [newPassword, setNewPassword] = useState("");
@@ -37,7 +38,8 @@ const Registration = () => {
                 await addDoc(userCollectionRef, {
                     name: newName,
                     email: newEmail,
-                    password: newPassword
+                    password: newPassword,
+                    token: getToken
                 });
 
                 // confirm to user and navigate to login
@@ -50,6 +52,26 @@ const Registration = () => {
             alert("Please confirm your password correctly!");
         }
         
+    };
+
+    const [open, setOpen] = useState(false);
+
+    const handleClick = () => {
+        setOpen(true);
+
+        // generate token
+        const generateToken = GenerateToken();
+        setToken(generateToken);
+
+        navigator.clipboard.writeText(generateToken);
+    };
+
+    const handleClose = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+
+        setOpen(false);
     }
 
     return (
@@ -125,22 +147,31 @@ const Registration = () => {
                         />
                     </Box>
 
-                    {/* Access Token Field
-                    <Box>
+                    {/* Access Token Field */}
+                    <Box display={"flex"} alignItems="center" justifyContent={"flex-start"} gap="10px">
                         <TextField
                             id="outlined-password-input"
                             label="Access Token"
-                            helperText="Token will be generated soon"
                             type="text"
                             disabled
+                            value={getToken}
                             autoComplete="current-password"
                             size="small"
-                            style={{width: '300px', margin: '10px 0'}}
+                            style={{width: '160px', margin: '10px 0'}}
                             inputProps={{style: {fontSize: 15}}}
                         />
-                    </Box> */}
 
-                    <Button onClick={handleRegistration} variant="contained" sx={{width: '300px', backgroundColor: '#1E8CF1'}} disableElevation>Create an account</Button>
+                        <Button onClick={handleClick} sx={{fontSize: 15}} color="secondary">Generate Token</Button>
+
+                        <Snackbar
+                            open={open}
+                            autoHideDuration={2000}
+                            onClose={handleClose}
+                            message="Text copied"
+                        />
+                    </Box>
+
+                    <Button onClick={handleRegistration} disabled={getToken === ''}  variant="contained" sx={{width: '300px', backgroundColor: '#1E8CF1', marginTop: '5px'}} disableElevation>Create an account</Button>
 
                     <p style={{opacity: 0.3, position: 'fixed', bottom: 0}}>Copyright 2023. Thesis Project Purposes.</p>
                 </div>

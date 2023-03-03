@@ -1,6 +1,14 @@
 import { db } from "../../config/firebase";
 import { collection, getDocs, limit, orderBy, query, where, Timestamp } from "firebase/firestore";
 
+export const getUserInfo = async (currentUserToken) => {
+    const querySnapshot = await getDocs(
+        query(collection(db, "users"), where('token' , '==', currentUserToken))
+    );
+
+    return querySnapshot.docs.map((doc) => ({ ...doc.data() }));
+};
+
 export const getAllChartDataByQuery = async (collectionName)  => {
     // Get the start of current month
     const currentDate = new Date();
