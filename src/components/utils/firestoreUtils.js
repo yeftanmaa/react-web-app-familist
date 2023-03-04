@@ -48,4 +48,12 @@ export const getAllSchedulerData = async () => {
     const getSchedulerData = await getDocs(schedulerRef);
 
     return getSchedulerData.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
-}
+};
+
+export const GetAllCashflowData = async () => {
+    const cashflowRef = collection(db, "workspace-graph");
+
+    const getCashflowData = await getDocs(cashflowRef);
+
+    return getCashflowData.docs.map((doc) => ({ ...doc.data(), id: doc.id}))
+};
