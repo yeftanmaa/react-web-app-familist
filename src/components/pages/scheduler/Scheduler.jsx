@@ -9,6 +9,7 @@ import { getAllSchedulerData } from "../../utils/firestoreUtils";
 import ModalDeleteScheduler from "../../modals/DeleteScheduler";
 import ModalEditScheduler from "../../modals/EditScheduler";
 import ModalSchedulerDetails from "../../modals/DetailScheduler";
+import { ArrowDownward, ArrowUpward } from "@mui/icons-material";
 
 const Scheduler = () => {
 
@@ -83,6 +84,41 @@ const Scheduler = () => {
     const handleChangeRowsPerPage = (event) => {
         setRowsPerPage(parseInt(event.target.value, 10));
         setPage(0);
+    };
+
+    // Sorting config
+    const [sortColumn, setSortColumn] = useState(null);
+    const [sortOrder, setSortOrder] = useState(null);
+
+    const handleSort = (column) => {
+        if (sortColumn === column) {
+            setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+        } else {
+            setSortColumn(column);
+            setSortOrder('asc');
+        }
+    }
+
+    const sortedData = schedulerData.slice().sort((a, b) => {
+        if (sortColumn === 'title') {
+            return (sortOrder === 'asc' ? 1 : -1) * (a.title > b.title ? 1 : -1);
+        } else if (sortColumn === 'type') {
+            return (sortOrder === 'asc' ? 1 : -1) * (a.type > b.type ? 1 : -1);
+        } else {
+            return 0;
+        }
+    });
+
+    const sortIcon = (column) => {
+        if (sortColumn === column) {
+            if (sortOrder === 'asc') {
+                return <ArrowUpward fontSize="small" sx={{marginBottom: '5px'}} />;
+            } else if (sortOrder === 'desc') {
+                return <ArrowDownward fontSize="small" sx={{marginBottom: '5px'}} />
+            }
+        } else {
+            return null;
+        }
     }
 
     return (
@@ -100,22 +136,30 @@ const Scheduler = () => {
                     <Table sx={{minWidth: 650}}>
                         <TableHead>
                             <TableRow>
-                                <TableCell sx={{fontWeight: 600, fontSize: 15}} >Title</TableCell>
-                                <TableCell sx={{fontWeight: 600, fontSize: 15}}>Type</TableCell>
-                                <TableCell sx={{fontWeight: 600, fontSize: 15}}>Action</TableCell>
-                                <TableCell sx={{fontWeight: 600, fontSize: 15}} align="center">Status</TableCell>
+                                <TableCell onClick={() => handleSort('title')} sx={{fontWeight: 600, fontSize: 15, cursor: 'pointer'}}>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px'}}>
+                                        Title {sortIcon('title')}
+                                    </Box>
+                                </TableCell>
+                                <TableCell onClick={() => handleSort('type')} sx={{fontWeight: 600, fontSize: 15,  cursor: 'pointer', display: 'flex', gap: '10px'}}>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px'}}>
+                                        Type {sortIcon('type')}
+                                    </Box>
+                                </TableCell>
+                                <TableCell sx={{fontWeight: 600, fontSize: 15}}>Status</TableCell>
+                                <TableCell sx={{fontWeight: 600, fontSize: 15}} align="center">Action</TableCell>
                             </TableRow>
                         </TableHead>
 
                         <TableBody>
                             {(rowsPerPage > 0
-                                ? schedulerData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                : schedulerData
+                                ? sortedData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                : sortedData
                             ).map((item) => (
                                 <TableRow key={item.id}>
                                     <TableCell><Link component="button" sx={{fontWeight: 500, fontSize: 15, textDecoration: 'none', color: '#0047FF'}} onClick={() => {handleOpenDetailModal(item.desc, item.title, item.type, item.id)}}>{item.title}</Link></TableCell>
-                                    <TableCell>Active</TableCell>
                                     <TableCell>{item.type}</TableCell>
+                                    <TableCell>Active</TableCell>
 
                                     <TableCell align="center">
                                         <IconButton onClick={() => handleOpenEditModal(item.desc, item.title, item.type, item.id)} size="large">

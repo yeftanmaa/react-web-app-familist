@@ -116,7 +116,7 @@ const Profile = () => {
                 <Button onClick={handleLogout} endIcon={<LogoutIcon />} color="cancel" variant="contained" href="/">Sign Out</Button>
             </Box>
 
-            <p style={{opacity: 0.3, position: 'fixed', bottom: 0}}>Copyright 2023. Thesis Project Purposes.</p>
+            <p style={{opacity: 0.3, position: 'fixed', bottom: '1%'}}>Copyright 2023. Thesis Project Purposes.</p>
         </div>
     );
 }
