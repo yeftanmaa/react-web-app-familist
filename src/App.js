@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { createTheme, ThemeProvider } from '@mui/material';
 
 // page import
@@ -73,6 +73,8 @@ function App() {
             <Route path='/scheduler' element={<Scheduler />} />
           </Route>
 
+          {/* redirect to login if route is not defined */}
+          <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

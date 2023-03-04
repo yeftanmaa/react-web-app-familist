@@ -8,7 +8,7 @@ import ModalAddScheduler from "../../modals/AddScheduler";
 import { getAllSchedulerData } from "../../utils/firestoreUtils";
 import ModalDeleteScheduler from "../../modals/DeleteScheduler";
 import ModalEditScheduler from "../../modals/EditScheduler";
-import ModalSchedulerDetails from "../../modals/SchedulerDetails";
+import ModalSchedulerDetails from "../../modals/DetailScheduler";
 
 const Scheduler = () => {
 

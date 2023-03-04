@@ -1,15 +1,29 @@
-import { TextField, Typography, Button, Box } from "@mui/material";
+import { Grid, Typography, Button, Paper, Box } from "@mui/material";
 import { Container } from "@mui/system";
 import { signOut } from "firebase/auth";
-import { React, useEffect, useRef, useState } from "react";
+import { React, useEffect, useState } from "react";
 import { auth, db } from "../../../config/firebase";
 import css from "../../styles/global-style.css";
 import { collection, getDocs, query, where } from "firebase/firestore";
+import { styled } from '@mui/material/styles';
+import LogoutIcon from '@mui/icons-material/Logout';
+import ModalEditProfile from "../../modals/EditProfile";
+
+const Item = styled(Paper)(({ theme }) => ({
+    backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
+    ...theme.typography.body2,
+    padding: '20px 30px',
+    textAlign: 'left',
+    marginLeft: '10px',
+    fontSize: '15px',
+    color: theme.palette.text.secondary,
+}));
 
 const Profile = () => {
-    const getDataName = useRef(null);
-    const [workspaceName, setWorkspaceName] = useState("");
-    const [workspaceDesc, setWorkspaceDesc] = useState("This is Nathan workspace with his family.");
+    const [userName, setUserName] = useState("");
+    const [userDesc, setUserDesc] = useState("");
+    const [userPhone, setUserPhone] = useState("");
+    const [userEmail, setUserEmail] = useState("");
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -19,8 +33,11 @@ const Profile = () => {
 
                 getDocs(q).then((querySnapshot) => {
                     querySnapshot.docs.forEach((doc) => {
-                        getDataName.current = doc.data().name + "'s Family";
-                        setWorkspaceName(doc.data().name + "'s Family");
+
+                        setUserName(doc.data().name);
+                        setUserDesc(doc.data().description);
+                        setUserPhone(doc.data().phone);
+                        setUserEmail(doc.data().email);
                     });
                 }).catch((error) => {
                     console.log("Error getting documents: ", error);
@@ -34,70 +51,72 @@ const Profile = () => {
         
     }, [])
 
-    
-
-    const handleBlur = (e) => {
-        if (e.target.value === '') {
-            setWorkspaceName(getDataName.current);
-        }
+    const handleLogout = () => {
+        signOut(auth);
     };
 
-    const handleLogout =() => {
-        signOut(auth);
-    }
+    const [openEditModal, setOpenEditModal] = useState(false);
+
+    const handleOpenEditModal = () => {
+        setOpenEditModal((prev) => !prev);
+    };
+
+    const handleCloseEditModal = () => {
+        setOpenEditModal((prev) => !prev);
+    };
 
     return (
-        <div>
+        <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', textAlign: 'center', height: '600px'}}>
             <Container>
-                <div className="profile-box" style={css}>
-                    <Typography variant="h3" fontWeight={500} marginBottom={2}>Profile</Typography>
+                <Typography variant="h4" fontWeight={500} marginBottom={2}>Profile</Typography>
+                <Box sx={{ display: 'flex', alignItems: "center", marginTop: '20px', justifyContent: 'center'}}>
                     
-                    <div className="profile-details" style={css}>
-                        <Typography variant="body">Workspace Name:</Typography>
+                    <Box display="grid" alignItems="center" textAlign="left" gridTemplateColumns="repeat(12, 1fr)" gap={2}>
 
-                        <br />
+                        <Grid gridColumn="span 2">
+                            <Typography variant="body1" sx={{fontWeight: '600'}}>Name:</Typography>
+                        </Grid>
+                        <Grid gridColumn="span 10">
+                            <Item>{userName}</Item>
+                        </Grid>
 
-                        <TextField
-                            
-                            value={workspaceName} // get real value from firestore db
-                            onBlur={handleBlur}
-                            onChange={(event) => setWorkspaceName(event.target.value)}
-                            id="outlined-password-input"
-                            placeholder="Put your workspace name"
-                            type="text"
-                            size="small"
-                            style={{width: '300px', margin: '10px 0'}}
-                            inputProps={{style: {fontSize: 15}}}
-                        />
-                    </div>
+                        <Grid gridColumn="span 2">
+                            <Typography variant="body1" sx={{fontWeight: '600'}}>About Me:</Typography>
+                        </Grid>
+                        <Grid gridColumn="span 10">
+                            <Item>{userDesc}</Item>
+                        </Grid>
 
-                    <div className="profile-details" style={css}>
-                        <Typography variant="body">Workspace Description:</Typography>
-
-                        <br />
+                        <Grid gridColumn="span 2">
+                            <Typography variant="body1" sx={{fontWeight: '600'}}>Email: </Typography>
+                        </Grid>
+                        <Grid gridColumn="span 10">
+                            <Item>{userEmail}</Item>
+                        </Grid>
                         
-                        <TextField
-                            onBlur={handleBlur}
-                            onChange={(event) => setWorkspaceDesc(event.target.value)}
-                            multiline
-                            id="outlined-password-input"
-                            placeholder="Put your workspace description"
-                            value={workspaceDesc} // get real value from firestore db
-                            type="text"
-                            size="small"
-                            style={{width: '300px', margin: '10px 0'}}
-                            inputProps={{style: {fontSize: 15}}}
-                        />
-                    </div>                        
+                        <Grid gridColumn="span 2">
+                            <Typography variant="body1" sx={{fontWeight: '600'}}>Phone: </Typography>
+                        </Grid>
+                        <Grid gridColumn="span 10">
+                            <Item>{userPhone}</Item>
+                        </Grid>
 
-                    <Box className="box" sx={css}>
-                        <Button className="btn-group" sx={css} color="primary" disabled={workspaceName === '' || workspaceName === getDataName.current} variant="contained">Edit</Button>
-                        <Button onClick={handleLogout} className="btn-group" sx={css} color="cancel" variant="contained" href="/">Logout</Button>
+                        <Grid gridColumn="span 2"></Grid>
+                        <Grid gridColumn="span 10" justifyContent={"center"}>
+                            <Button onClick={handleOpenEditModal} variant="outlined" sx={{ width: '30%', marginLeft: '10px'}}>Edit Profile</Button>
+                            {openEditModal && (
+                                <ModalEditProfile open={openEditModal} onclose={handleCloseEditModal} onCloseClick={handleCloseEditModal} name={userName} desc={userDesc} email={userEmail} phone={userPhone} />
+                            )}
+                        </Grid>
                     </Box>
-
-                    <p style={{opacity: 0.3, position: 'fixed', bottom: 0}}>Copyright 2023. Thesis Project Purposes.</p>
-                </div>
+                </Box>
             </Container>
+
+            <Box className="box" sx={css}>
+                <Button onClick={handleLogout} endIcon={<LogoutIcon />} color="cancel" variant="contained" href="/">Sign Out</Button>
+            </Box>
+
+            <p style={{opacity: 0.3, position: 'fixed', bottom: 0}}>Copyright 2023. Thesis Project Purposes.</p>
         </div>
     );
 }

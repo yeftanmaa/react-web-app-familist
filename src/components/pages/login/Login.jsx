@@ -122,7 +122,7 @@ const Login = () => {
                     
                     <Box width={"300px"} sx={{display: 'flex', gap: "10px"}}>
                         <Button onClick={loginHandler} variant="contained" sx={{width: '150px', backgroundColor: '#1E8CF1'}} disableElevation>Sign In</Button>
-                        <Button onClick={signInWithGoogle} variant="contained" color="secondary" sx={{width: '150px'}} startIcon={<GoogleIcon />}>Use Google</Button>
+                        <Button onClick={signInWithGoogle} variant="outlined" color="secondary" sx={{width: '150px'}} startIcon={<GoogleIcon />}>Use Google</Button>
                     </Box>
                     
                     <Link onClick={TriggerResetEmail} sx={{fontSize: '15px', marginTop: '10px', cursor: "pointer", fontWeight: 400}}>Forgot password?</Link>
