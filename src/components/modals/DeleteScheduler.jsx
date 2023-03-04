@@ -1,9 +1,10 @@
 import { Button, Modal, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { deleteDoc, doc } from "firebase/firestore";
-import React from "react";
+import React, { useState } from "react";
 import { db } from "../../config/firebase";
-import css from "../styles/global-style.css"
+import css from "../styles/global-style.css";
+import SnackbarComponent from "../snackbar";
 
 const style = {
     position: 'absolute',
@@ -19,34 +20,64 @@ const style = {
 
 const ModalDeleteScheduler = ({open, handleClose, onCloseClick, docID}) => {
 
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState('');
+    const [snackbarSeverity, setSnackbarSeverity] = useState('success');
+
     const deleteScheduler = async () => {
         const schedulerRef = doc(db, 'scheduler', docID);
 
         try {   
             await deleteDoc(schedulerRef);
-            alert("Scheduler deleted!");
-            handleClose();
-            window.location.reload();
+            setSnackbarMessage('Scheduler has been deleted!');
+                setSnackbarSeverity('info');
+                setSnackbarOpen(true);
+                setTimeout(() => {
+                    setSnackbarOpen(false);
+                    window.location.reload();
+                }, 3000);
         } catch(err) {
             console.error("Error!", err);
+            setSnackbarMessage('Error! Could not delete the scheduler.');
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+            setTimeout(() => {
+                setSnackbarOpen(false);
+            }, 3000);
         }
+    };
+
+    const handleCLoseSnackbar = () => {
+        setSnackbarOpen(false);
     }
 
     return (
-        <Modal
-            open={open}
-            onClose={handleClose}
-        >
-            <Box sx={style}>
-                <Typography variant="h4" sx={{textAlign: 'center', fontWeight: '500', fontSize: 30, marginBottom: 1}}>Are you sure</Typography>
-                <Typography variant="h4" sx={{textAlign: 'center', fontWeight: '400', fontSize: 17, color: 'rgba(0, 0, 0, 0.61)'}} >want to delete this scheduler?</Typography>
+        <div>
+            <Modal
+                open={open}
+                onClose={handleClose}
+            >
+                <Box sx={style}>
+                    <Typography variant="h4" sx={{textAlign: 'center', fontWeight: '500', fontSize: 30, marginBottom: 1}}>Are you sure</Typography>
+                    <Typography variant="h4" sx={{textAlign: 'center', fontWeight: '400', fontSize: 17, color: 'rgba(0, 0, 0, 0.61)'}} >want to delete this scheduler?</Typography>
 
-                <Box className="box-delete-scheduler" sx={css}>
-                    <Button onClick={deleteScheduler} className="btn-group-delete-scheduler" sx={css} color="primary" variant="contained">Yes</Button>
-                    <Button onClick={onCloseClick} className="btn-group-delete-scheduler" sx={css} color="cancel" variant="outlined">No</Button>
+                    <Box className="box-delete-scheduler" sx={css}>
+                        <Button onClick={deleteScheduler} className="btn-group-delete-scheduler" sx={css} color="primary" variant="contained">Yes</Button>
+                        <Button onClick={onCloseClick} className="btn-group-delete-scheduler" sx={css} color="cancel" variant="outlined">No</Button>
+                    </Box>
                 </Box>
-            </Box>
-        </Modal>
+            </Modal>
+
+            {snackbarOpen && (
+                <SnackbarComponent
+                    open={snackbarOpen}
+                    handleClose={handleCLoseSnackbar}
+                    message={snackbarMessage}
+                    severity={snackbarSeverity}
+                />
+            )}
+        </div>
+            
     );
 }
  

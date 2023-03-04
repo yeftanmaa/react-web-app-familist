@@ -7,11 +7,15 @@ import { Container } from "@mui/system";
 import { useNavigate } from "react-router-dom";
 import GoogleIcon from '@mui/icons-material/Google';
 import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
+import SnackbarComponent from '../../snackbar';
 
 const Login = () => {
     const navigate = useNavigate();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState('');
+    const [snackbarSeverity, setSnackbarSeverity] = useState('success');
 
     const loginHandler = async (e) => {
         e.preventDefault();
@@ -26,7 +30,12 @@ const Login = () => {
                 navigate("/dashboard");
               }
         } catch (err) {
-            alert("Please enter correct email and password!");
+            setSnackbarMessage('Error! Please enter correct email and password!');
+            setSnackbarSeverity('warning');
+            setSnackbarOpen(true);
+            setTimeout(() => {
+                setSnackbarOpen(false);
+            }, 3000);
         }
     }
 
@@ -49,16 +58,31 @@ const Login = () => {
 
             navigate("/dashboard");
         } catch (err) {
-            alert(err);
+            setSnackbarMessage('Error! Could not logged in with Google');
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+            setTimeout(() => {
+                setSnackbarOpen(false);
+            }, 3000);
         }
     }
 
     const TriggerResetEmail = async () => {
         try {
             await sendPasswordResetEmail(auth, email);
-            alert("Password reset email sent!");
+            setSnackbarMessage('Sent password reset to your email');
+            setSnackbarSeverity('info');
+            setSnackbarOpen(true);
+            setTimeout(() => {
+                setSnackbarOpen(false);
+            }, 3000);
         } catch(err) {
-            alert("Please provide correct email!");
+            setSnackbarMessage('Please provide correct email!');
+            setSnackbarSeverity('warning');
+            setSnackbarOpen(true);
+            setTimeout(() => {
+                setSnackbarOpen(false);
+            }, 3000);
         }
         
     }
@@ -130,7 +154,14 @@ const Login = () => {
                     <p style={{opacity: 0.3, position: 'fixed', bottom: 0}}>Copyright 2023. Thesis Project Purposes.</p>
                 </div>
             </Container>    
-            
+            {snackbarOpen && (
+                <SnackbarComponent
+                    open={snackbarOpen}
+                    handleClose={handleCLoseSnackbar}
+                    message={snackbarMessage}
+                    severity={snackbarSeverity}
+                />
+            )}
         </div>
     );
 }

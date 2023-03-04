@@ -7,6 +7,7 @@ import { auth, db } from "../../../config/firebase";
 import { useNavigate } from "react-router-dom";
 import { collection, addDoc } from "firebase/firestore";
 import { GenerateToken } from "../../utils/tokenGenerator";
+import SnackbarComponent from "../../snackbar";
 
 const Registration = () => {
 
@@ -19,13 +20,23 @@ const Registration = () => {
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
 
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState('');
+    const [snackbarSeverity, setSnackbarSeverity] = useState('success');
+
     const userCollectionRef = collection(db, "users");
 
     const handleRegistration = async() => {
 
         // not allowing empty input
         if (newName === "" || newEmail === "" || newPassword === "" || confirmPassword === "") {
-            alert("Field cannot left empty!");
+            setSnackbarMessage('Field cannot left empty!');
+                setSnackbarSeverity('error');
+                setSnackbarOpen(true);
+                setTimeout(() => {
+                    setSnackbarOpen(false);
+                    navigate('/');
+                }, 3000);
         };
 
         // check if password and confirmPassword are matched
@@ -43,16 +54,31 @@ const Registration = () => {
                 });
 
                 // confirm to user and navigate to login
-                alert ("Your account is created!");
-                navigate('/');
+                setSnackbarMessage('Your account successfully created!');
+                setSnackbarSeverity('success');
+                setSnackbarOpen(true);
+                setTimeout(() => {
+                    setSnackbarOpen(false);
+                    navigate('/');
+                }, 3000);
             } catch(err) {
-                console.error(err);
+                setSnackbarMessage('Error! Could not create your account.');
+                setSnackbarSeverity('error');
+                setSnackbarOpen(true);
             }
         } else {
-            alert("Please confirm your password correctly!");
+            setSnackbarMessage('Please confirm your password correctly');
+            setSnackbarSeverity('warning');
+            setSnackbarOpen(true);
+            setTimeout(() => {
+                setSnackbarOpen(false);
+            }, 3000);
         }
-        
     };
+
+    const handleCLoseSnackbar = () => {
+        setSnackbarOpen(false);
+    }
 
     const [open, setOpen] = useState(false);
 
@@ -177,6 +203,15 @@ const Registration = () => {
                 </div>
             </Container>
             
+            {snackbarOpen && (
+                <SnackbarComponent
+                    open={snackbarOpen}
+                    handleClose={handleCLoseSnackbar}
+                    message={snackbarMessage}
+                    severity={snackbarSeverity}
+                />
+            )}
+
         </div>
     );
 }

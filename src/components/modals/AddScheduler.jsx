@@ -3,7 +3,8 @@ import { Box } from "@mui/system";
 import { addDoc, collection, Timestamp } from "firebase/firestore";
 import React, { useState } from "react";
 import { db } from "../../config/firebase";
-import css from "../styles/global-style.css"
+import css from "../styles/global-style.css";
+import SnackbarComponent from "../snackbar";
 
 const style = {
     position: 'absolute',
@@ -23,6 +24,9 @@ const ModalAddScheduler = ({open, handleClose, onCloseClick}) => {
     const [schedulerType, setSchedulerType] = useState('');
     const [schedulerDesc, setSchedulerDesc] = useState('');
     const schedulerRef = collection(db, "scheduler");
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState('');
+    const [snackbarSeverity, setSnackbarSeverity] = useState('success');
 
     const HandleSave = async() => {
         // not allowing empty title neither type
@@ -40,70 +44,94 @@ const ModalAddScheduler = ({open, handleClose, onCloseClick}) => {
                 });
 
                 // confirm if data successfully saved
-                alert("Data saved!", handleClose);
-                handleClose();
-                window.location.reload();
+                setSnackbarMessage('New scheduler has been added!');
+                setSnackbarSeverity('success');
+                setSnackbarOpen(true);
+                setTimeout(() => {
+                    setSnackbarOpen(false);
+                    window.location.reload();
+                }, 3000);
             } catch(err) {
-                console.error("Error!", err);
+                setSnackbarMessage('Error! Could not add new scheduler.');
+                setSnackbarSeverity('error');
+                setSnackbarOpen(true);
+                setTimeout(() => {
+                    setSnackbarOpen(false);
+                }, 3000);
             };
         };
     };
 
+    const handleCLoseSnackbar = () => {
+        setSnackbarOpen(false);
+    }
+
     return (
-        <Modal
-            open={open}
-            onClose={handleClose}
-        >
-            <Box sx={style}>
-                <Typography variant="h4" sx={{textAlign: 'center', fontWeight: '500', fontSize: 30}}>New Scheduler</Typography>
+        <div>
+            <Modal
+                open={open}
+                onClose={handleClose}
+            >
+                <Box sx={style}>
+                    <Typography variant="h4" sx={{textAlign: 'center', fontWeight: '500', fontSize: 30}}>New Scheduler</Typography>
 
-                <TextField
-                    label="Title"
-                    id="outlined-multiline-static"
-                    sx={{ marginTop: '25px', marginBottom: '15px'}}
-                    fullWidth
-                    type="text"
-                    size="small"
-                    onChange={(e) => setSchedulerTitle(e.target.value)}
-                    placeholder="Name of this scheduler"
-                    InputProps={{
-                        style: {fontSize: 15}
-                    }}
-                />
+                    <TextField
+                        label="Title"
+                        id="outlined-multiline-static"
+                        sx={{ marginTop: '25px', marginBottom: '15px'}}
+                        fullWidth
+                        type="text"
+                        size="small"
+                        onChange={(e) => setSchedulerTitle(e.target.value)}
+                        placeholder="Name of this scheduler"
+                        InputProps={{
+                            style: {fontSize: 15}
+                        }}
+                    />
 
-                <TextField
-                    id="outlined-multiline-static"
-                    onChange={(e) => setSchedulerDesc(e.target.value)}
-                    label="Description"
-                    type="text"
-                    multiline
-                    rows={4}
-                    size="small"
-                    fullWidth
-                    placeholder="Add some details for your new scheduler"
-                    inputProps={{style: {fontSize: 15}}}
-                />
+                    <TextField
+                        id="outlined-multiline-static"
+                        onChange={(e) => setSchedulerDesc(e.target.value)}
+                        label="Description"
+                        type="text"
+                        multiline
+                        rows={4}
+                        size="small"
+                        fullWidth
+                        placeholder="Add some details for your new scheduler"
+                        inputProps={{style: {fontSize: 15}}}
+                    />
 
-                <FormControl sx={{marginTop: '15px'}} fullWidth>
-                    <InputLabel id="select-schedule-type-label">Scheduler Type</InputLabel>
-                    <Select
-                        labelId="select-schedule-type-label"
-                        id="select-schedule-type"
-                        label="Scheduler Type"
-                        value={schedulerType}
-                        onChange={(e) => setSchedulerType(e.target.value)}
-                    >
-                        <MenuItem value="Tagihan bulanan">Monthly</MenuItem>
-                        <MenuItem value="Tagihan tahunan">Annual</MenuItem>
-                    </Select>
-                </FormControl>
+                    <FormControl sx={{marginTop: '15px'}} fullWidth>
+                        <InputLabel id="select-schedule-type-label">Scheduler Type</InputLabel>
+                        <Select
+                            labelId="select-schedule-type-label"
+                            id="select-schedule-type"
+                            label="Scheduler Type"
+                            value={schedulerType}
+                            onChange={(e) => setSchedulerType(e.target.value)}
+                        >
+                            <MenuItem value="Tagihan bulanan">Monthly</MenuItem>
+                            <MenuItem value="Tagihan tahunan">Annual</MenuItem>
+                        </Select>
+                    </FormControl>
 
-                <Box className="box-income-modal" sx={css}>
-                    <Button onClick={HandleSave} className="btn-group-income-modal" sx={css} color="primary" variant="contained">Create</Button>
-                    <Button onClick={onCloseClick} className="btn-group-income-modal" sx={css} color="cancel" variant="outlined">Cancel</Button>
+                    <Box className="box-income-modal" sx={css}>
+                        <Button onClick={HandleSave} className="btn-group-income-modal" sx={css} color="primary" variant="contained">Create</Button>
+                        <Button onClick={onCloseClick} className="btn-group-income-modal" sx={css} color="cancel" variant="outlined">Cancel</Button>
+                    </Box>
                 </Box>
-            </Box>
-        </Modal>
+            </Modal>
+
+            {snackbarOpen && (
+                <SnackbarComponent
+                    open={snackbarOpen}
+                    handleClose={handleCLoseSnackbar}
+                    message={snackbarMessage}
+                    severity={snackbarSeverity}
+                />
+            )}
+        </div>
     );
 }
  
