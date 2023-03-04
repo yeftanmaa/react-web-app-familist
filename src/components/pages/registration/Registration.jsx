@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button, Typography, Box, TextField, Snackbar } from "@mui/material";
+import { Button, Typography, Box, TextField, Snackbar, Select, MenuItem, InputLabel, FormControl } from "@mui/material";
 import css from "../../styles/global-style.css";
 import { Container } from "@mui/system";
 import { createUserWithEmailAndPassword } from "firebase/auth";
@@ -98,7 +98,10 @@ const Registration = () => {
         }
 
         setOpen(false);
-    }
+    };
+
+    const [typeOfUser, setTypeOfUser] = useState("");
+    console.log(typeOfUser);
 
     return (
         <div>
@@ -173,29 +176,47 @@ const Registration = () => {
                         />
                     </Box>
 
-                    {/* Access Token Field */}
-                    <Box display={"flex"} alignItems="center" justifyContent={"flex-start"} gap="10px">
-                        <TextField
-                            id="outlined-password-input"
-                            label="Access Token"
-                            type="text"
-                            disabled
-                            value={getToken}
-                            autoComplete="current-password"
-                            size="small"
-                            style={{width: '160px', margin: '10px 0'}}
-                            inputProps={{style: {fontSize: 15}}}
-                        />
-
-                        <Button onClick={handleClick} sx={{fontSize: 15}} color="secondary">Generate Token</Button>
-
-                        <Snackbar
-                            open={open}
-                            autoHideDuration={2000}
-                            onClose={handleClose}
-                            message="Text copied"
-                        />
+                    {/* Ask do they wants to be workspace admin or they want to be normal user */}
+                    <Box>
+                        <FormControl sx={{ m: 1 }}>
+                            <InputLabel id="demo-simple-select-helper-label">Select Your Role</InputLabel>
+                            <Select
+                                value={typeOfUser}
+                                label="Select Your Role"
+                                sx={{width: '300px'}}
+                                onChange={(e) => setTypeOfUser(e.target.value)}
+                            >
+                                <MenuItem value="Workspace Admin">Workspace admin</MenuItem>
+                                <MenuItem value="Normal User">Normal user</MenuItem>
+                            </Select>
+                        </FormControl>
                     </Box>
+
+                    {/* Access Token Field */}
+                    {typeOfUser === "Workspace Admin" && (
+                        <Box display={"flex"} alignItems="center" justifyContent={"flex-start"} gap="10px" >
+                            <TextField
+                                id="outlined-password-input"
+                                label="Access Token"
+                                type="text"
+                                disabled
+                                value={getToken}
+                                autoComplete="current-password"
+                                size="small"
+                                style={{width: '160px', margin: '10px 0'}}
+                                inputProps={{style: {fontSize: 15}}}
+                            />
+
+                            <Button onClick={handleClick} sx={{fontSize: 15}} color="secondary">Generate Token</Button>
+
+                            <Snackbar
+                                open={open}
+                                autoHideDuration={2000}
+                                onClose={handleClose}
+                                message="Text copied"
+                            />
+                        </Box>  
+                    )}
 
                     <Button onClick={handleRegistration} disabled={getToken === ''}  variant="contained" sx={{width: '300px', backgroundColor: '#1E8CF1', marginTop: '5px'}} disableElevation>Create an account</Button>
 
