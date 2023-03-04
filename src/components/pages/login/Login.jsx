@@ -85,7 +85,12 @@ const Login = () => {
             }, 3000);
         }
         
+    };
+
+    const handleCLoseSnackbar = () => {
+        setSnackbarOpen(false);
     }
+    
     return (
         <div>
             <div className="navbar" style={css}>
