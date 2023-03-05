@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button, Typography, Box, TextField, Snackbar, Select, MenuItem, InputLabel, FormControl } from "@mui/material";
+import { Button, Typography, Box, TextField, Snackbar, Select, MenuItem, InputLabel, FormControl, InputAdornment, IconButton } from "@mui/material";
 import css from "../../styles/global-style.css";
 import { Container } from "@mui/system";
 import { createUserWithEmailAndPassword } from "firebase/auth";
@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { collection, addDoc } from "firebase/firestore";
 import { GenerateToken } from "../../utils/tokenGenerator";
 import SnackbarComponent from "../../snackbar";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 const Registration = () => {
 
@@ -103,6 +104,18 @@ const Registration = () => {
     const [typeOfUser, setTypeOfUser] = useState("");
     console.log(typeOfUser);
 
+    // Toggle button
+    const [showPassword, setShowPassword] = useState(false);
+
+    const handleClickShowPassword = () => {
+        setShowPassword(true);
+    };
+
+    const handleMouseDownPassword = (e) => {
+        e.preventDefault();
+        setShowPassword(false);
+    }
+
     return (
         <div>
             <div className="navbar" style={css}>
@@ -151,13 +164,26 @@ const Registration = () => {
                         <TextField
                             id="outlined-password-input"
                             label="Password"
-                            type="password"
+                            type={showPassword ? 'text' : 'password'}
                             autoComplete="current-password"
                             size="small"
                             onChange={(e) => setNewPassword(e.target.value)}
                             placeholder="Set your password"
                             style={{width: '300px', margin: '10px 0'}}
                             inputProps={{style: {fontSize: 15}}}
+                            InputProps={{
+                                endAdornment: (
+                                  <InputAdornment position="end">
+                                    <IconButton
+                                      aria-label="toggle password visibility"
+                                      onClick={handleClickShowPassword}
+                                      onMouseDown={handleMouseDownPassword}
+                                    >
+                                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                                    </IconButton>
+                                  </InputAdornment>
+                                ),
+                            }}
                         />
                     </Box>
 

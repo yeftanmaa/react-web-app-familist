@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import { sendPasswordResetEmail, signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { auth, db, googleProvider } from "../../../config/firebase";
-import { Button, Typography, Box, TextField, Link } from "@mui/material";
+import { Button, Typography, Box, TextField, Link, InputAdornment, IconButton } from "@mui/material";
 import css from "../../styles/global-style.css";
 import { Container } from "@mui/system";
 import { useNavigate } from "react-router-dom";
 import GoogleIcon from '@mui/icons-material/Google';
 import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
 import SnackbarComponent from '../../snackbar';
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 const Login = () => {
     const navigate = useNavigate();
@@ -16,6 +17,17 @@ const Login = () => {
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
     const [snackbarSeverity, setSnackbarSeverity] = useState('success');
+
+    const [showPassword, setShowPassword] = useState(false);
+
+    const handleClickShowPassword = () => {
+        setShowPassword(true);
+    }
+
+    const handleMouseDownPassword = (e) => {
+        e.preventDefault();
+        setShowPassword(false);
+    }
 
     const loginHandler = async (e) => {
         e.preventDefault();
@@ -125,13 +137,26 @@ const Login = () => {
                         <TextField
                             id="outlined-password-input"
                             label="Password"
-                            type="password"
+                            type={showPassword ? 'text' : 'password'}
                             autoComplete="current-password"
                             size="small"
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder="Enter your password"
                             style={{width: '300px', margin: '10px 0'}}
-                            inputProps={{style: {fontSize: 15}}}
+                            inputProps={{ style: {fontSize: 15}}}
+                            InputProps={{
+                                endAdornment: (
+                                  <InputAdornment position="end">
+                                    <IconButton
+                                      aria-label="toggle password visibility"
+                                      onClick={handleClickShowPassword}
+                                      onMouseDown={handleMouseDownPassword}
+                                    >
+                                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                                    </IconButton>
+                                  </InputAdornment>
+                                ),
+                            }}
                         />
                     </Box>
 
