@@ -18,11 +18,11 @@ const style = {
     p: 4,
 };
 
-const ModalAddIncome = ({open, handleClose, onCloseClick, getLatestEarning}) => {
+const ModalAddExpense = ({open, handleClose, onCloseClick, getLatestEarning}) => {
 
-    const [incomeTitle, setIncomeTitle] = useState("");
-    const [incomeDesc, setIncomeDesc] = useState("");
-    const [income, setIncome] = useState(0);
+    const [expenseTitle, setExpenseTitle] = useState("");
+    const [expenseDesc, setExpenseDesc] = useState("");
+    const [expense, setExpense] = useState(0);
     const workspaceRef = collection(db, "workspace-graph");
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
@@ -30,15 +30,15 @@ const ModalAddIncome = ({open, handleClose, onCloseClick, getLatestEarning}) => 
 
     const HandleSave = async() => {
         // not allowing empty earning input
-        if (income === 0) {
-            setSnackbarMessage('Income is mandatory!');
+        if (expense === 0) {
+            setSnackbarMessage('Expense is mandatory!');
             setSnackbarSeverity('warning');
             setSnackbarOpen(true);
             setTimeout(() => {
                 setSnackbarOpen(false);
             }, 3000);
-        } else if (Number(income) <= 0) {
-            setSnackbarMessage('Income could not negative numbers!');
+        } else if (Number(expense) > Number(getLatestEarning)) {
+            setSnackbarMessage('Expense could not exceed current earnings!');
             setSnackbarSeverity('error');
             setSnackbarOpen(true);
             setTimeout(() => {
@@ -48,16 +48,16 @@ const ModalAddIncome = ({open, handleClose, onCloseClick, getLatestEarning}) => 
             try {
                 await addDoc(workspaceRef, {
                     createdAt: Timestamp.fromDate(new Date()),
-                    title: incomeTitle,
-                    description: incomeDesc,
-                    amount: Number(income),
-                    type: 'Income',
-                    totalEarnings: Number(getLatestEarning) + Number(income),
+                    title: expenseTitle,
+                    description: expenseDesc,
+                    amount: Number(expense),
+                    type: 'Expense',
+                    totalEarnings: Number(getLatestEarning) - Number(expense),
                     token: "n4th4nSpace"
                 });
 
                 // confirm if data successfully saved
-                setSnackbarMessage('Income has been added to your workspace!');
+                setSnackbarMessage('Expense has been added to your workspace!');
                 setSnackbarSeverity('success');
                 setSnackbarOpen(true);
                 setTimeout(() => {
@@ -86,12 +86,12 @@ const ModalAddIncome = ({open, handleClose, onCloseClick, getLatestEarning}) => 
                 onClose={handleClose}
             >
                 <Box sx={style}>
-                    <Typography variant="h4" sx={{textAlign: 'center', fontWeight: 'medium'}}>Add Income</Typography>
+                    <Typography variant="h4" sx={{textAlign: 'center', fontWeight: 'medium'}}>Add Expense</Typography>
 
                     {/* Title field */}
                     <TextField
                         id="outlined-multiline-static"
-                        onChange={(e) => setIncomeTitle(e.target.value)}
+                        onChange={(e) => setExpenseTitle(e.target.value)}
                         label="Title"
                         type="text"
                         size="small"
@@ -100,18 +100,18 @@ const ModalAddIncome = ({open, handleClose, onCloseClick, getLatestEarning}) => 
                         inputProps={{style: {fontSize: 15}}}
                         sx={{ marginTop: '25px', marginBottom: '20px'}}
                     />
-                    
-                    {/* Description field */}
+
+                    {/* Description Field */}
                     <TextField
                         id="outlined-multiline-static"
-                        onChange={(e) => setIncomeDesc(e.target.value)}
+                        onChange={(e) => setExpenseDesc(e.target.value)}
                         label="Description"
                         type="text"
                         multiline
                         rows={4}
                         size="small"
                         fullWidth
-                        placeholder="Add some details for your new income"
+                        placeholder="Add some details for your new expense"
                         inputProps={{style: {fontSize: 15}}}
                     />
 
@@ -122,7 +122,7 @@ const ModalAddIncome = ({open, handleClose, onCloseClick, getLatestEarning}) => 
                         sx={{ marginTop: '25px'}}
                         fullWidth
                         type="number"
-                        onChange={(e) => setIncome(e.target.value)}
+                        onChange={(e) => setExpense(e.target.value)}
                         size="large"
                         placeholder="Set your new income"
                         InputProps={{
@@ -150,4 +150,4 @@ const ModalAddIncome = ({open, handleClose, onCloseClick, getLatestEarning}) => 
     );
 }
  
-export default ModalAddIncome;
+export default ModalAddExpense;

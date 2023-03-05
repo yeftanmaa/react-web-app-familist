@@ -124,8 +124,8 @@ const Scheduler = () => {
     return (
         <div>
             <Container>
-                <Box display={"flex"} justifyContent={"space-between"} alignItems={"center"} marginTop={"20px"}>
-                    <Typography variant="h4" fontWeight={500}>Scheduled Payments</Typography>
+                <Box display={"flex"} alignItems={"center"} marginTop={"20px"}>
+                    <Typography flexGrow={1} variant="h4" fontWeight={500}>Scheduled Payments</Typography>
                     <Button onClick={handleOpenModal} startIcon={<AddIcon />} variant="contained" color="primary" sx={{padding: '5px 15px', borderRadius: '7px'}}>New Schedule</Button>
 
                     {openModal && <ModalAddScheduler open={openModal} handleClose={handleCloseModal} onCloseClick={handleCloseModal} />}

@@ -10,6 +10,7 @@ import { GetAllCashflowData, getAllChartDataByQuery, getTodayEarningByQuery } fr
 import ModalAddIncome from "../../modals/AddIncome";
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
+import ModalAddExpense from "../../modals/AddExpense";
 
 const Dashboard = () => {
 
@@ -115,6 +116,7 @@ const Dashboard = () => {
     })
 
     const [openModal, setOpenModal] = useState(false);
+    const [openExpenseModal, setOpenExpenseModal] = useState(false);
     
     const handleOpenModal = () => {
         setOpenModal(true);
@@ -124,6 +126,14 @@ const Dashboard = () => {
         setOpenModal(false);
     }
 
+    const handleOpenExpenseModal = () => {
+        setOpenExpenseModal(true);
+    }
+
+    const handleCloseExpenseModal = () => {
+        setOpenExpenseModal(false);
+    }
+    
     const [cashflowData, setCashflowData] = useState([]);
 
     useEffect(() => {
@@ -141,7 +151,7 @@ const Dashboard = () => {
             <Container maxWidth="lg">
 
                 <Box display={"flex"} alignItems={"center"} marginTop={"30px"}>
-                    <Button startIcon={<RemoveIcon />} onClick={handleOpenModal} variant="contained" color="error" sx={{borderRadius: '7px'}}>Add Outcome</Button>
+                    <Button startIcon={<RemoveIcon />} onClick={handleOpenExpenseModal} variant="contained" color="error" sx={{borderRadius: '7px'}}>Add Expense</Button>
 
                     <Box flexGrow={1} textAlign={"center"}>
                         <Typography variant="h6" fontWeight={400}>Current total earnings:</Typography>
@@ -151,6 +161,7 @@ const Dashboard = () => {
                     <Button startIcon={<AddIcon />} onClick={handleOpenModal} variant="contained" color="primary" sx={{borderRadius: '7px'}}>Add Income</Button>
 
                     {openModal && <ModalAddIncome open={openModal} handleClose={handleCloseModal} onCloseClick={handleCloseModal} getLatestEarning={latestEarning} />}
+                    {openExpenseModal && <ModalAddExpense open={openExpenseModal} handleClose={handleCloseExpenseModal} onCloseClick={handleCloseExpenseModal} getLatestEarning={latestEarning} />}
                 </Box>
                 
                 <div style={{width: "100%", marginTop: "30px", marginLeft: 'auto', marginRight: 'auto'}}>
@@ -179,13 +190,13 @@ const Dashboard = () => {
                                     <TableRow key={cashdata.id}>
                                         <TableCell>{new Date(cashdata.createdAt.seconds * 1000).toLocaleDateString()}</TableCell>
                                         <TableCell>
-                                            <Box bgcolor={cashdata.type === 'Income' ? 'rgba(20, 202, 9, 0.87)' : 'rgba(234, 71, 71, 0.95)'} sx={{padding: '4px 5px', fontSize: '13px', color: 'white', borderRadius: '50px', textAlign: 'center'}}>
-                                                {cashdata.type === 'Income' ? 'Income' : 'Outcome'}
+                                            <Box bgcolor={cashdata.type === 'Income' ? 'rgba(20, 202, 9, 0.87)' : 'rgba(234, 71, 71, 0.95)'} sx={{padding: '4px 9px', fontSize: '13px', color: 'white', borderRadius: '50px', textAlign: 'center'}}>
+                                                {cashdata.type === 'Income' ? 'Income' : 'Expenses'}
                                             </Box>
                                         </TableCell>
                                         <TableCell>{cashdata.title}</TableCell>
                                         <TableCell>{cashdata.description}</TableCell>
-                                        <TableCell>{cashdata.amount}</TableCell>
+                                        <TableCell>{cashdata.amount.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}</TableCell>
                                         <TableCell sx={{ textAlign: 'right'}}>{cashdata.totalEarnings.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}</TableCell>
                                     </TableRow>
                                 ))}
