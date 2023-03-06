@@ -170,7 +170,7 @@ const Dashboard = () => {
 
                 <div style={{margin: 'auto', width: '100%', marginTop: '65px'}}>
                     <Typography variant="h4" sx={{marginBottom: '20px'}}>Cashflow History</Typography>
-                    <TableContainer sx={{borderRadius: '10px', backgroundColor: 'rgb(250,250,250)', p: 1, marginBottom: '30px'}}>
+                    <TableContainer sx={{height:'600px', overflowY: 'auto', borderRadius: '10px', backgroundColor: 'rgb(250,250,250)', p: 1, marginBottom: '30px'}}>
                         <Table>
                             <TableHead>
                                 <TableRow>
