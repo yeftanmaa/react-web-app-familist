@@ -86,7 +86,7 @@ const ModalAddExpense = ({open, handleClose, onCloseClick, getLatestEarning}) =>
                 onClose={handleClose}
             >
                 <Box sx={style}>
-                    <Typography variant="h4" sx={{textAlign: 'center', fontWeight: 'medium'}}>Add Expense</Typography>
+                    <Typography variant="h4" sx={{textAlign: 'center', fontWeight: 'medium'}}>New Expense</Typography>
 
                     {/* Title field */}
                     <TextField
