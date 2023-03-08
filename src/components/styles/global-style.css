@@ -2,14 +2,18 @@
     display: flex;
     justify-content: space-between;
     padding: 20px;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: white;
 }
 
 .regis-box {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    height: 600px;
     justify-content: center;
+    align-items: center;
+    min-height: 80vh;
 }
 
 .profile-box {

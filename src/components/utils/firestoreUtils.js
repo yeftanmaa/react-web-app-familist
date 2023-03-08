@@ -57,3 +57,11 @@ export const GetAllCashflowData = async () => {
 
     return getCashflowData.docs.map((doc) => ({ ...doc.data(), id: doc.id}))
 };
+
+export const GetFamilyMembers = async () => {
+    const memberRef = collection(db, "users");
+
+    const getFamilyMembers = await getDocs(memberRef);
+
+    return getFamilyMembers.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
+};

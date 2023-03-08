@@ -1,13 +1,14 @@
-import { Grid, Typography, Button, Paper, Box } from "@mui/material";
+import { Grid, Typography, Button, Paper, Box, Avatar, AvatarGroup, Tooltip } from "@mui/material";
 import { Container } from "@mui/system";
 import { signOut } from "firebase/auth";
 import { React, useEffect, useState } from "react";
 import { auth, db } from "../../../config/firebase";
-import css from "../../styles/global-style.css";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { styled } from '@mui/material/styles';
 import LogoutIcon from '@mui/icons-material/Logout';
+import EditIcon from '@mui/icons-material/Edit';
 import ModalEditProfile from "../../modals/EditProfile";
+import { GetFamilyMembers } from "../../utils/firestoreUtils";
 
 const Item = styled(Paper)(({ theme }) => ({
     backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -24,6 +25,16 @@ const Profile = () => {
     const [userDesc, setUserDesc] = useState("");
     const [userPhone, setUserPhone] = useState("");
     const [userEmail, setUserEmail] = useState("");
+    const [familyMembers, setFamilyMembers] = useState([]);
+
+    useEffect(() => {
+        const fetchFamilyMembersData = async () => {
+            const memberData = await GetFamilyMembers();
+            setFamilyMembers(memberData);
+        }
+
+        fetchFamilyMembersData();
+    }, [])
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -103,17 +114,28 @@ const Profile = () => {
 
                         <Grid gridColumn="span 2"></Grid>
                         <Grid gridColumn="span 10" justifyContent={"center"}>
-                            <Button onClick={handleOpenEditModal} variant="outlined" sx={{ width: '30%', marginLeft: '10px'}}>Edit Profile</Button>
+                            <Button onClick={handleOpenEditModal} startIcon={<EditIcon />} variant="outlined" sx={{ width: '30%', marginLeft: '10px', marginRight: '10px'}}>Edit Profile</Button>
+                            <Button onClick={handleLogout} endIcon={<LogoutIcon />} color="cancel" variant="contained" href="/">Sign Out</Button>
                             {openEditModal && (
                                 <ModalEditProfile open={openEditModal} onclose={handleCloseEditModal} onCloseClick={handleCloseEditModal} name={userName} desc={userDesc} email={userEmail} phone={userPhone} />
                             )}
                         </Grid>
                     </Box>
                 </Box>
+
             </Container>
 
-            <Box className="box" sx={css}>
-                <Button onClick={handleLogout} endIcon={<LogoutIcon />} color="cancel" variant="contained" href="/">Sign Out</Button>
+            <Box component={Paper} display={"flex"} width="320px" justifyContent={"space-evenly"} alignItems={"center"} p={1} sx={{position: "absolute", bottom: '60px'}}>
+                    <Typography variant="h6" sx={{fontSize: '16px'}}>Family Members:</Typography>
+                    <AvatarGroup max={4}>
+                        {familyMembers.map((member) => (
+                            <Tooltip title={member.name}>
+                                <Avatar alt={member.name}>{member.name[0]}</Avatar>
+                            </Tooltip>
+                            
+                        ))}
+                    </AvatarGroup>
+                    
             </Box>
 
             <p style={{opacity: 0.3, position: 'fixed', bottom: '1%'}}>Copyright 2023. Thesis Project Purposes.</p>
