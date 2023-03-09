@@ -45,11 +45,11 @@ const Registration = () => {
         if (newPassword === confirmPassword) {
             try {
                 // create a new user in Firebase Auth
-                await (await createUserWithEmailAndPassword(auth, newEmail, newPassword))
-                .then(() => {
-                    sendEmailVerification(auth.currentUser);
-                })
+                const { user } = await createUserWithEmailAndPassword(auth, newEmail, newPassword);
                 
+                // send email verification
+                await sendEmailVerification(user);
+
                 // Add user's name, email and password to Firestore
                 await addDoc(userCollectionRef, {
                     name: newName,

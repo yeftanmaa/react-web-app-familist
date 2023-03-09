@@ -1,11 +1,11 @@
 import { Button, Modal, Typography, TextField, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 import { Box } from "@mui/system";
-// import { deleteDoc, doc } from "firebase/firestore";
-import React, { useState } from "react";
-// import { db } from "../../config/firebase";
+import React, { useEffect, useState } from "react";
 import css from "../styles/global-style.css";
 import SnackbarComponent from "../snackbar";
-// import SnackbarComponent from "../snackbar";
+import { addDoc, collection } from "firebase/firestore";
+import { db } from "../../config/firebase";
+import { GetMemberOnCurrentToken } from "../utils/firestoreUtils";
 
 const style = {
     position: 'absolute',
@@ -29,33 +29,58 @@ function ModalAddTask({ open, handleClose, onCloseClick }) {
     const [snackbarMessage, setSnackbarMessage] = useState('');
     const [snackbarSeverity, setSnackbarSeverity] = useState('success');
 
-    const HandleSave = async () => {
-        if (taskTitle === "") {
-            alert("Task title is mandatory!");
-        } else if (taskAssignee === "") {
-            alert ("Please assign this task to your family member!");
-        } else {
-            try {
-                console.log(taskTitle, taskDesc, taskEstimationPrice, taskAssignee);
+    const [memberList, setMemberList] = useState([]);
 
-                // confirm if data successfully saved
-                setSnackbarMessage('New scheduler has been added!');
-                setSnackbarSeverity('success');
-                setSnackbarOpen(true);
-                setTimeout(() => {
-                    setSnackbarOpen(false);
-                    window.location.reload();
-                }, 3000);
-            } catch (err) {
-                setSnackbarMessage('Error! Could not add new scheduler.');
-                setSnackbarSeverity('error');
-                setSnackbarOpen(true);
-                setTimeout(() => {
-                    setSnackbarOpen(false);
-                }, 3000);
-            
-            } 
+    useEffect(() => {
+        const fetchMemberListData = async () => {
+            const memberListData = await GetMemberOnCurrentToken('n4th4nSpace');
+            setMemberList(memberListData);
         }
+
+        fetchMemberListData();
+    }, [])
+
+    const taskRef = collection(db, "payments");
+
+    const HandleSave = async () => {
+
+        if (taskDesc === "") {
+            setTaskDesc('No description');
+        } else {
+            if (taskTitle === "") {
+                alert("Task title is mandatory!");
+            } else if (taskAssignee === "") {
+                alert ("Please assign this payment task to your family member!");
+            } else {
+                try {
+                    await addDoc(taskRef, {
+                        title: taskTitle,
+                        desc: taskDesc,
+                        priceEstimation: Number(taskEstimationPrice),
+                        status: 'topay',
+                        assignee: taskAssignee
+                    });
+    
+                    // confirm if data successfully saved
+                    setSnackbarMessage('New payment task has been added!');
+                    setSnackbarSeverity('success');
+                    setSnackbarOpen(true);
+                    setTimeout(() => {
+                        setSnackbarOpen(false);
+                        window.location.reload();
+                    }, 1500);
+                } catch (err) {
+                    setSnackbarMessage('Error! Could not add new payment task.');
+                    setSnackbarSeverity('error');
+                    setSnackbarOpen(true);
+                    setTimeout(() => {
+                        setSnackbarOpen(false);
+                    }, 3000);
+                
+                } 
+            }
+        }
+
     };
 
     const handleCLoseSnackbar = () => {
@@ -102,7 +127,7 @@ function ModalAddTask({ open, handleClose, onCloseClick }) {
                         id="outlined-multiline-static"
                         label="Estimation Price"
                         sx={{ marginTop: '15px'}}
-                        type="text"
+                        type="number"
                         onChange={(e) => setTaskEstimationPrice(e.target.value)}
                         rows={4}
                         size="small"
@@ -121,9 +146,9 @@ function ModalAddTask({ open, handleClose, onCloseClick }) {
                             value={taskAssignee}
                             onChange={(e) => setTaskAssignee(e.target.value)}
                         >
-                            <MenuItem value="johanes-yefta">Johanes Yefta</MenuItem>
-                            <MenuItem value="ayah">Ayah</MenuItem>
-                            <MenuItem value="ibu">Ibu</MenuItem>
+                            {memberList.map((member) => (
+                                <MenuItem value={member.name}>{member.name}</MenuItem>
+                            ))}
                         </Select>
                     </FormControl>
 

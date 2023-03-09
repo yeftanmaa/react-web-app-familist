@@ -82,3 +82,17 @@ export const UpdateCardStatus = async (cardID, newStatus) => {
         console.error('Error updating card status!', err);
     }
 };
+
+export const GetMemberOnCurrentToken = async (keyValue) => {
+    
+    const memberListRef = collection(db, 'users');
+
+    const getMemberOnToken = query(memberListRef, where("token", "==", keyValue));
+    const querySnapshot = await getDocs(getMemberOnToken);
+
+    if (!querySnapshot.empty) {
+       return querySnapshot.docs.map((doc) => ({ ...doc.data() }))
+    } else {
+        alert("No Users in this workspace!");
+    }
+};

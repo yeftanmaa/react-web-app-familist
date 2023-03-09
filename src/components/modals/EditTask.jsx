@@ -1,10 +1,11 @@
 import { Button, Modal, Typography, TextField, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 import { Box } from "@mui/system";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { db } from "../../config/firebase";
 import css from "../styles/global-style.css";
 import SnackbarComponent from "../snackbar";
 import { doc, updateDoc } from "firebase/firestore";
+import { GetMemberOnCurrentToken } from "../utils/firestoreUtils";
 
 const style = {
     position: 'absolute',
@@ -19,21 +20,34 @@ const style = {
 };
 
 
-function ModalEditTask({ open, handleClose, onCloseClick, desc, priceEstimation, title, id }) {
+function ModalEditTask({ open, handleClose, onCloseClick, desc, priceEstimation, title, assignee, id }) {
   
     const [getDesc, setDesc] = useState(desc);
     const [getTitle, setTitle] = useState(title);
     const [getPriceEstimation, setPriceEstimation] = useState(priceEstimation);
+    const [getAssignee, setGetAssignee] = useState(assignee);
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
     const [snackbarSeverity, setSnackbarSeverity] = useState('success');
+
+    const [memberList, setMemberList] = useState([]);
+
+    useEffect(() => {
+        const fetchMemberListData = async () => {
+            const memberListData = await GetMemberOnCurrentToken('n4th4nSpace');
+            setMemberList(memberListData);
+        }
+
+        fetchMemberListData();
+    }, [])
 
     const EditTask = async () => {
         const paymentRef = doc(db, 'payments', id);
         const newValue = {
             desc: getDesc,
             title: getTitle,
-            priceEstimation: Number(getPriceEstimation)
+            priceEstimation: Number(getPriceEstimation),
+            assignee: getAssignee
         }
 
         try {
@@ -117,11 +131,13 @@ function ModalEditTask({ open, handleClose, onCloseClick, desc, priceEstimation,
                         labelId="select-schedule-type-label"
                         id="select-schedule-type"
                         label="Assignee"
+                        value={getAssignee}
+                        onChange={(e) => setGetAssignee(e.target.value)}
                         displayEmpty
                     >
-                        <MenuItem value="johanes-yefta">Johanes Yefta</MenuItem>
-                        <MenuItem value="ayah">Ayah</MenuItem>
-                        <MenuItem value="ibu">Ibu</MenuItem>
+                        {memberList.map((member) => (
+                                <MenuItem value={member.name}>{member.name}</MenuItem>
+                        ))}
                     </Select>
                 </FormControl>
 

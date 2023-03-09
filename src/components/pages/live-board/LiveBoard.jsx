@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
-import { Fab, IconButton, Typography } from "@mui/material";
+import { Fab, IconButton, Typography, Avatar, InputLabel, Select, MenuItem } from "@mui/material";
 import { Box, Container } from "@mui/system";
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -8,11 +8,30 @@ import ModalEditTask from "../../modals/EditTask";
 import ModalDeleteTask from "../../modals/DeleteTask";
 import AddIcon from '@mui/icons-material/Add';
 import ModalAddTask from "../../modals/AddTask";
-import { GetPaymentInfo, UpdateCardStatus } from "../../utils/firestoreUtils";
+import { GetMemberOnCurrentToken, GetPaymentInfo, UpdateCardStatus } from "../../utils/firestoreUtils";
 
 function App() {
 
   const [taskCard, setTaskCard] = useState([]);
+  
+  // retrieve member list of current workspace
+  const [memberList, setMemberList] = useState([]);
+
+  useEffect(() => {
+    const fetchMemberListData = async () => {
+      const memberListData = await GetMemberOnCurrentToken('n4th4nSpace');
+      setMemberList(memberListData);
+    }
+
+    fetchMemberListData();
+  }, [])
+
+  // filter by assignee
+  const [selectedAssignee, setSelectedAssignee] = useState("");
+
+  const handleFilterAssignee = (e) => {
+    setSelectedAssignee(e.target.value);
+  };
 
   useEffect(() => {
     const fetchCardData = async () => {
@@ -27,20 +46,20 @@ function App() {
     const taskStatus = {
       topay: {
         name: "To Pay",
-        items: taskCard.filter(task => task.status === 'topay')
+        items: taskCard.filter(task => task.status === 'topay' && (selectedAssignee === '' || task.assignee === selectedAssignee))
       },
       inprogress: {
         name: "In Progress",
-        items: taskCard.filter(task => task.status === 'inprogress')
+        items: taskCard.filter(task => task.status === 'inprogress' && (selectedAssignee === '' || task.assignee === selectedAssignee))
       },
       done: {
         name: "Done",
-        items: taskCard.filter(task => task.status === 'done')
+        items: taskCard.filter(task => task.status === 'done' && (selectedAssignee === '' || task.assignee === selectedAssignee))
       }
     };
 
     setColumns(taskStatus);
-  }, [taskCard])
+  }, [taskCard, selectedAssignee])
   
   const onDragEnd = (result, columns, setColumns) => {
     if (!result.destination) return;
@@ -87,6 +106,7 @@ function App() {
   const [selectTaskTitle, setSelectTaskTitle] = useState('');
   const [selectTaskDesc, setSelectTaskDesc] = useState('');
   const [selectTaskPrice, setSelectTaskPrice] = useState('');
+  const [selectTaskAssignee, setSelectTaskAssignee] = useState('');
 
   // modal handler
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
@@ -103,12 +123,13 @@ function App() {
     setOpenDeleteModal(false);
   };
 
-  const handleOpenEditModal = (desc, priceEstimation, title, id) => {
+  const handleOpenEditModal = (desc, priceEstimation, title, assignee, id) => {
     setOpenEditModal(true);
     setSelectTaskDesc(desc);
     setSelectTaskPrice(priceEstimation);
     setSelectTaskTitle(title);
     setSelectDocumentId(id);
+    setSelectTaskAssignee(assignee);
   };
 
   const handleCloseEditModal = () => {
@@ -123,7 +144,7 @@ function App() {
     setOpenAddModal(false);
   };
 
-
+  
   return (
     <div>
       <Container maxWidth="xl">
@@ -131,7 +152,28 @@ function App() {
           <Fab onClick={handleOpenAddModal} color="primary"> <AddIcon /> </Fab>
         </Box>
 
-        <Typography variant="h4" style={{ fontWeight: 500 }}>Kanban Board</Typography>
+        <Box sx={{display: "flex", justifyContent: 'space-between', alignItems: 'center'}}>
+          <Typography variant="h4" style={{ fontWeight: 500 }}>Kanban Board</Typography>
+          
+          <Box sx={{display: 'flex', alignItems: 'center', gap: '20px'}}>
+            <InputLabel id="assignee-label">Filter by Assignee</InputLabel>
+            <Select
+              labelId="assignee-label"
+              id="assignee-select"
+              size="small"
+              placeholder="All"
+              value={selectedAssignee}
+              onChange={handleFilterAssignee}
+              style={{ minWidth: '200px' }}
+            >
+              <MenuItem value="">All</MenuItem>
+              {memberList.map((member) => (
+                <MenuItem value={member.name}>{member.name}</MenuItem>
+              ))}
+            </Select>
+          </Box>
+        </Box>
+        
         <div
           style={{
             display: "flex",
@@ -205,7 +247,7 @@ function App() {
                                         }}
                                       >
                                         <Box position={"absolute"} top={7} right={7}>
-                                          <IconButton onClick={() => handleOpenEditModal(item.desc, item.priceEstimation, item.title, item.id)}>
+                                          <IconButton onClick={() => handleOpenEditModal(item.desc, item.priceEstimation, item.title, item.assignee, item.id)}>
                                             <EditIcon color="primary" />
                                           </IconButton>
 
@@ -220,8 +262,13 @@ function App() {
                                           <Typography fontStyle={'italic'} sx={{ fontSize: 14, color: '#C9C9C9'}}>{item.desc}</Typography>
                                         </Box>
 
-                                        <Box position={"absolute"} bottom={7} left={15}>
+                                        <Box position={"absolute"} bottom={10} left={15}>
                                           <Typography variant="h6" sx={{color: '#D14E4E', fontWeight: 600, fontSize: '16px'}} >{item.priceEstimation.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}</Typography>
+                                        </Box>
+
+                                        <Box position={"absolute"} bottom={10} right={10} display={"flex"} alignItems={"center"} gap={1}>
+                                          <Typography variant="h6" sx={{fontWeight: 400, fontSize: '14px'}} >{item.assignee}</Typography>
+                                          <Avatar sx={{width: 32, height: 32, fontSize: 15}}>T</Avatar>
                                         </Box>
                                         
                                       </div>
@@ -258,6 +305,7 @@ function App() {
             onCloseClick={handleCloseEditModal}
             desc={selectTaskDesc}
             priceEstimation={selectTaskPrice}
+            assignee={selectTaskAssignee}
             title={selectTaskTitle}
             id={selectDocumentId}
           />
