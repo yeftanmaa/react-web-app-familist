@@ -20,6 +20,13 @@ const Item = styled(Paper)(({ theme }) => ({
     color: theme.palette.text.secondary,
 }));
 
+function randomColor() {
+    let hex = Math.floor(Math.random() * 0xFFFFFF);
+    let color = "#" + hex.toString(16);
+
+    return color;
+}
+
 const Profile = () => {
     const [userName, setUserName] = useState("");
     const [userDesc, setUserDesc] = useState("");
@@ -130,7 +137,7 @@ const Profile = () => {
                     <AvatarGroup max={4}>
                         {familyMembers.map((member) => (
                             <Tooltip title={member.name}>
-                                <Avatar alt={member.name}>{member.name[0]}</Avatar>
+                                <Avatar alt={member.name} style={{backgroundColor: randomColor()}}>{member.name[0]}</Avatar>
                             </Tooltip>
                             
                         ))}

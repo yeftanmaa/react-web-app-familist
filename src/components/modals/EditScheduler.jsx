@@ -39,13 +39,12 @@ const ModalEditScheduler = ({open, handleClose, onCloseClick, desc, title, type,
         try {
             updateDoc(schedulerRef, newValue);
             setSnackbarMessage('Scheduler has been edited!');
-                setSnackbarSeverity('success');
-                setSnackbarOpen(true);
-                setTimeout(() => {
-                    setSnackbarOpen(false);
-                    window.location.reload();
-                }, 3000);
-            window.location.reload();
+            setSnackbarSeverity('success');
+            setSnackbarOpen(true);
+            setTimeout(() => {
+                setSnackbarOpen(false);
+                window.location.reload();
+            }, 3000);
         } catch(err) {
             console.error("Error!", err);
             setSnackbarMessage('Error! Could not edit the scheduler.');

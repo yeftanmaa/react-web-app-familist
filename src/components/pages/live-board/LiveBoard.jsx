@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
 import { Fab, IconButton, Typography } from "@mui/material";
 import { Box, Container } from "@mui/system";
@@ -8,29 +8,39 @@ import ModalEditTask from "../../modals/EditTask";
 import ModalDeleteTask from "../../modals/DeleteTask";
 import AddIcon from '@mui/icons-material/Add';
 import ModalAddTask from "../../modals/AddTask";
+import { GetPaymentInfo, UpdateCardStatus } from "../../utils/firestoreUtils";
 
 function App() {
-  const tasks = [
-    { id: "1", content: "Beli sabun mandi", desc: 'No description', priceEstimation: 5000, status: 'topay' },
-    { id: "2", content: "Beli pasta gigi", desc: 'No description', priceEstimation: 12000, status: 'topay' },
-    { id: "3", content: "Bayar SPP sekolah", desc: 'Pembayaran SPP sekolah untuk bulan Februari 2023', priceEstimation: 450000 ,status: 'inprogress' },
-    { id: "4", content: "Servis HP rusak", desc: 'Layar HP samsung gabisa di sentuh, harus dibawa ke tempat service', priceEstimation: 320000, status: 'done' }
-  ];
-  
-  const taskStatus = {
-    toDo: {
-      name: "To Pay",
-      items: tasks.filter(task => task.status === 'topay')
-    },
-    inProgress: {
-      name: "In Progress",
-      items: tasks.filter(task => task.status === 'inprogress')
-    },
-    done: {
-      name: "Done",
-      items: tasks.filter(task => task.status === 'done' )
+
+  const [taskCard, setTaskCard] = useState([]);
+
+  useEffect(() => {
+    const fetchCardData = async () => {
+      const cardData = await GetPaymentInfo();
+      setTaskCard(cardData);
     }
-  };
+
+    fetchCardData();
+  }, [])
+
+  useEffect(() => {
+    const taskStatus = {
+      topay: {
+        name: "To Pay",
+        items: taskCard.filter(task => task.status === 'topay')
+      },
+      inprogress: {
+        name: "In Progress",
+        items: taskCard.filter(task => task.status === 'inprogress')
+      },
+      done: {
+        name: "Done",
+        items: taskCard.filter(task => task.status === 'done')
+      }
+    };
+
+    setColumns(taskStatus);
+  }, [taskCard])
   
   const onDragEnd = (result, columns, setColumns) => {
     if (!result.destination) return;
@@ -43,6 +53,9 @@ function App() {
       const destItems = [...destColumn.items];
       const [removed] = sourceItems.splice(source.index, 1);
       destItems.splice(destination.index, 0, removed);
+
+      UpdateCardStatus(removed.id, destination.droppableId);
+
       setColumns({
         ...columns,
         [source.droppableId]: {
@@ -69,23 +82,33 @@ function App() {
     }
   };
   
-  const [columns, setColumns] = useState(taskStatus);
+  const [columns, setColumns] = useState({});
+  const [selectDocumentId, setSelectDocumentId] = useState('');
+  const [selectTaskTitle, setSelectTaskTitle] = useState('');
+  const [selectTaskDesc, setSelectTaskDesc] = useState('');
+  const [selectTaskPrice, setSelectTaskPrice] = useState('');
 
   // modal handler
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [openEditModal, setOpenEditModal] = useState(false);
   const [openAddModal, setOpenAddModal] = useState(false);
 
-  const handleOpenDeleteModal = () => {
+  const handleOpenDeleteModal = (id) => {
     setOpenDeleteModal(true);
+    setSelectDocumentId(id);
+
   };
 
   const handleCloseDeleteModal = () => {
     setOpenDeleteModal(false);
   };
 
-  const handleOpenEditModal = () => {
+  const handleOpenEditModal = (desc, priceEstimation, title, id) => {
     setOpenEditModal(true);
+    setSelectTaskDesc(desc);
+    setSelectTaskPrice(priceEstimation);
+    setSelectTaskTitle(title);
+    setSelectDocumentId(id);
   };
 
   const handleCloseEditModal = () => {
@@ -182,16 +205,16 @@ function App() {
                                         }}
                                       >
                                         <Box position={"absolute"} top={7} right={7}>
-                                          <IconButton onClick={handleOpenEditModal}>
+                                          <IconButton onClick={() => handleOpenEditModal(item.desc, item.priceEstimation, item.title, item.id)}>
                                             <EditIcon color="primary" />
                                           </IconButton>
 
-                                          <IconButton onClick={handleOpenDeleteModal}>
+                                          <IconButton onClick={() => handleOpenDeleteModal(item.id)}>
                                             <DeleteIcon color="error" />
                                           </IconButton>
                                         </Box>
                                         
-                                        <Typography>{item.content}</Typography>
+                                        <Typography>{item.title}</Typography>
 
                                         <Box sx={{maxWidth: '260px', marginTop: 1}}>
                                           <Typography fontStyle={'italic'} sx={{ fontSize: 14, color: '#C9C9C9'}}>{item.desc}</Typography>
@@ -221,15 +244,32 @@ function App() {
         </div>
 
         {openAddModal && (
-          <ModalAddTask open={openAddModal} handleClose={handleCloseAddModal} onCloseClick={handleCloseAddModal} />
+          <ModalAddTask
+            open={openAddModal}
+            handleClose={handleCloseAddModal}
+            onCloseClick={handleCloseAddModal}
+          />
         )}
 
         {openEditModal && (
-          <ModalEditTask open={openEditModal} handleClose={handleCloseEditModal} onCloseClick={handleCloseEditModal} />
+          <ModalEditTask
+            open={openEditModal}
+            handleClose={handleCloseEditModal}
+            onCloseClick={handleCloseEditModal}
+            desc={selectTaskDesc}
+            priceEstimation={selectTaskPrice}
+            title={selectTaskTitle}
+            id={selectDocumentId}
+          />
         )}
 
         {openDeleteModal && (
-          <ModalDeleteTask open={openDeleteModal} handleClose={handleCloseDeleteModal} onCloseClick={handleCloseDeleteModal} />
+          <ModalDeleteTask
+            open={openDeleteModal}
+            handleClose={handleCloseDeleteModal}
+            onCloseClick={handleCloseDeleteModal}
+            docID={selectDocumentId}
+          />
         )}
       </Container>
     </div>

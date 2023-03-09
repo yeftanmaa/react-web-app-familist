@@ -2,13 +2,14 @@ import React, { useState } from "react";
 import { Button, Typography, Box, TextField, Snackbar, Select, MenuItem, InputLabel, FormControl, InputAdornment, IconButton } from "@mui/material";
 import css from "../../styles/global-style.css";
 import { Container } from "@mui/system";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { auth, db } from "../../../config/firebase";
 import { useNavigate } from "react-router-dom";
 import { collection, addDoc } from "firebase/firestore";
 import { GenerateToken } from "../../utils/tokenGenerator";
 import SnackbarComponent from "../../snackbar";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+
 
 const Registration = () => {
 
@@ -44,7 +45,10 @@ const Registration = () => {
         if (newPassword === confirmPassword) {
             try {
                 // create a new user in Firebase Auth
-                await createUserWithEmailAndPassword(auth, newEmail, newPassword);
+                await (await createUserWithEmailAndPassword(auth, newEmail, newPassword))
+                .then(() => {
+                    sendEmailVerification(auth.currentUser);
+                })
                 
                 // Add user's name, email and password to Firestore
                 await addDoc(userCollectionRef, {
@@ -244,7 +248,7 @@ const Registration = () => {
                         </Box>  
                     )}
 
-                    <Button onClick={handleRegistration} disabled={getToken === ''}  variant="contained" sx={{width: '300px', backgroundColor: '#1E8CF1', marginTop: '5px'}} disableElevation>Create an account</Button>
+                    <Button onClick={handleRegistration} disabled={typeOfUser === 'Workspace Admin' && getToken === ''}  variant="contained" sx={{width: '300px', backgroundColor: '#1E8CF1', marginTop: '5px'}} disableElevation>Create an account</Button>
 
                     <p style={{opacity: 0.3, position: 'fixed', bottom: 0}}>Copyright 2023. Thesis Project Purposes.</p>
                 </div>

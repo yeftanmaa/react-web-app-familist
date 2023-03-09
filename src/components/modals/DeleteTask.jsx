@@ -1,8 +1,8 @@
 import { Button, Modal, Typography } from "@mui/material";
 import { Box } from "@mui/system";
-// import { deleteDoc, doc } from "firebase/firestore";
+import { deleteDoc, doc } from "firebase/firestore";
 import React, { useState } from "react";
-// import { db } from "../../config/firebase";
+import { db } from "../../config/firebase";
 import css from "../styles/global-style.css";
 import SnackbarComponent from "../snackbar";
 
@@ -25,20 +25,20 @@ const ModalDeleteTask = ({open, handleClose, onCloseClick, docID}) => {
     const [snackbarSeverity, setSnackbarSeverity] = useState('success');
 
     const deleteTask = async () => {
-        // const schedulerRef = doc(db, 'scheduler', docID);
+        const paymentRef = doc(db, 'payments', docID);
 
         try {   
-            // await deleteDoc(schedulerRef);
-            setSnackbarMessage('Task has been deleted!');
-                setSnackbarSeverity('info');
-                setSnackbarOpen(true);
-                setTimeout(() => {
-                    setSnackbarOpen(false);
-                    window.location.reload();
-                }, 3000);
+            await deleteDoc(paymentRef);
+            setSnackbarMessage('Payment has been deleted!');
+            setSnackbarSeverity('info');
+            setSnackbarOpen(true);
+            setTimeout(() => {
+                setSnackbarOpen(false);
+                window.location.reload();
+            }, 1500);
         } catch(err) {
             console.error("Error!", err);
-            setSnackbarMessage('Error! Could not delete the task.');
+            setSnackbarMessage('Error! Could not delete the payment.');
             setSnackbarSeverity('error');
             setSnackbarOpen(true);
             setTimeout(() => {

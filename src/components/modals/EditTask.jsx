@@ -1,10 +1,10 @@
 import { Button, Modal, Typography, TextField, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 import { Box } from "@mui/system";
-// import { deleteDoc, doc } from "firebase/firestore";
-import React from "react";
-// import { db } from "../../config/firebase";
+import React, { useState } from "react";
+import { db } from "../../config/firebase";
 import css from "../styles/global-style.css";
-// import SnackbarComponent from "../snackbar";
+import SnackbarComponent from "../snackbar";
+import { doc, updateDoc } from "firebase/firestore";
 
 const style = {
     position: 'absolute',
@@ -19,8 +19,48 @@ const style = {
 };
 
 
-function ModalEditTask({ open, handleClose, onCloseClick }) {
-  return (
+function ModalEditTask({ open, handleClose, onCloseClick, desc, priceEstimation, title, id }) {
+  
+    const [getDesc, setDesc] = useState(desc);
+    const [getTitle, setTitle] = useState(title);
+    const [getPriceEstimation, setPriceEstimation] = useState(priceEstimation);
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState('');
+    const [snackbarSeverity, setSnackbarSeverity] = useState('success');
+
+    const EditTask = async () => {
+        const paymentRef = doc(db, 'payments', id);
+        const newValue = {
+            desc: getDesc,
+            title: getTitle,
+            priceEstimation: Number(getPriceEstimation)
+        }
+
+        try {
+            updateDoc(paymentRef, newValue);
+            setSnackbarMessage('Payment has been edited!');
+            setSnackbarSeverity('success');
+            setSnackbarOpen(true);
+            setTimeout(() => {
+                setSnackbarOpen(false);
+                window.location.reload();
+            }, 3000);
+        } catch(err) {
+            console.error("Error!", err);
+            setSnackbarMessage('Error! Could not edit the payment.');
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+            setTimeout(() => {
+                setSnackbarOpen(false);
+            }, 3000);
+        }
+    };
+
+    const handleCLoseSnackbar = () => {
+        setSnackbarOpen(false);
+    };
+  
+    return (
     <div>
         <Modal
             open={open}
@@ -35,6 +75,8 @@ function ModalEditTask({ open, handleClose, onCloseClick }) {
                     sx={{ marginTop: '25px', marginBottom: '15px'}}
                     fullWidth
                     type="text"
+                    value={getTitle}
+                    onChange={(e) => setTitle(e.target.value)}
                     size="small"
                     placeholder="Name of this scheduler"
                     InputProps={{
@@ -48,6 +90,8 @@ function ModalEditTask({ open, handleClose, onCloseClick }) {
                     type="text"
                     multiline
                     rows={4}
+                    value={getDesc}
+                    onChange={(e) => setDesc(e.target.value)}
                     size="small"
                     fullWidth
                     placeholder="Add some details for your new scheduler"
@@ -58,8 +102,9 @@ function ModalEditTask({ open, handleClose, onCloseClick }) {
                     id="outlined-multiline-static"
                     label="Estimation Price"
                     sx={{ marginTop: '15px'}}
-                    type="text"
-                    rows={4}
+                    type="number"
+                    value={getPriceEstimation}
+                    onChange={(e) => setPriceEstimation(e.target.value)}
                     size="small"
                     fullWidth
                     placeholder="How much the estimation price?"
@@ -81,20 +126,20 @@ function ModalEditTask({ open, handleClose, onCloseClick }) {
                 </FormControl>
 
                 <Box className="box-income-modal" sx={css}>
-                    <Button className="btn-group-income-modal" sx={css} color="primary" variant="contained">Save changes</Button>
+                    <Button onClick={EditTask} className="btn-group-income-modal" sx={css} color="primary" variant="contained">Save changes</Button>
                     <Button onClick={onCloseClick} className="btn-group-income-modal" sx={css} color="cancel" variant="outlined">Cancel</Button>
                 </Box>
             </Box>
         </Modal>
 
-        {/* {snackbarOpen && (
+        {snackbarOpen && (
             <SnackbarComponent
                 open={snackbarOpen}
                 handleClose={handleCLoseSnackbar}
                 message={snackbarMessage}
                 severity={snackbarSeverity}
             />
-        )} */}
+        )}
     </div>
   )
 }
