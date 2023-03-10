@@ -2,13 +2,14 @@ import React, { useState } from "react";
 import { Button, Typography, Box, TextField, Snackbar, Select, MenuItem, InputLabel, FormControl, InputAdornment, IconButton } from "@mui/material";
 import css from "../../styles/global-style.css";
 import { Container } from "@mui/system";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { auth, db } from "../../../config/firebase";
 import { useNavigate } from "react-router-dom";
 import { collection, addDoc } from "firebase/firestore";
 import { GenerateToken } from "../../utils/tokenGenerator";
 import SnackbarComponent from "../../snackbar";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+
 
 const Registration = () => {
 
@@ -18,8 +19,10 @@ const Registration = () => {
     const [getToken, setToken] = useState("");
     const [newName, setNewName] = useState("");
     const [newEmail, setNewEmail] = useState("");
+    const [newPhoneNumber, setNewPhoneNumber] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [typeOfUser, setTypeOfUser] = useState("");
 
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
@@ -42,14 +45,24 @@ const Registration = () => {
 
         // check if password and confirmPassword are matched
         if (newPassword === confirmPassword) {
+            
+            if (typeOfUser === 'Normal User') {
+                setToken('n4th4nSpace');
+            }
+
             try {
                 // create a new user in Firebase Auth
-                await createUserWithEmailAndPassword(auth, newEmail, newPassword);
+                const { user } = await createUserWithEmailAndPassword(auth, newEmail, newPassword);
                 
+                // send email verification
+                await sendEmailVerification(user);
+
                 // Add user's name, email and password to Firestore
                 await addDoc(userCollectionRef, {
                     name: newName,
                     email: newEmail,
+                    phone: newPhoneNumber,
+                    description: 'Hi, I am new to Familist!',
                     password: newPassword,
                     token: getToken
                 });
@@ -101,7 +114,7 @@ const Registration = () => {
         setOpen(false);
     };
 
-    const [typeOfUser, setTypeOfUser] = useState("");
+    
     console.log(typeOfUser);
 
     // Toggle button
@@ -154,6 +167,20 @@ const Registration = () => {
                             size="small"
                             onChange={(e) => setNewEmail(e.target.value)}
                             placeholder="Set your email address"
+                            style={{width: '300px', margin: '10px 0'}}
+                            inputProps={{style: {fontSize: 15}}}
+                        />
+                    </Box>
+
+                    {/* Phone Input */}
+                    <Box>
+                        <TextField
+                            id="outlined-password-input"
+                            label="Phone Number"
+                            type="number"
+                            size="small"
+                            onChange={(e) => setNewPhoneNumber(e.target.value)}
+                            placeholder="Set your phone number"
                             style={{width: '300px', margin: '10px 0'}}
                             inputProps={{style: {fontSize: 15}}}
                         />
@@ -244,7 +271,7 @@ const Registration = () => {
                         </Box>  
                     )}
 
-                    <Button onClick={handleRegistration} disabled={getToken === ''}  variant="contained" sx={{width: '300px', backgroundColor: '#1E8CF1', marginTop: '5px'}} disableElevation>Create an account</Button>
+                    <Button onClick={handleRegistration} disabled={typeOfUser === 'Workspace Admin' && getToken === ''}  variant="contained" sx={{width: '300px', backgroundColor: '#1E8CF1', marginTop: '5px'}} disableElevation>Create an account</Button>
 
                     <p style={{opacity: 0.3, position: 'fixed', bottom: 0}}>Copyright 2023. Thesis Project Purposes.</p>
                 </div>

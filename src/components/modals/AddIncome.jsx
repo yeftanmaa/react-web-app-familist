@@ -86,7 +86,7 @@ const ModalAddIncome = ({open, handleClose, onCloseClick, getLatestEarning}) => 
                 onClose={handleClose}
             >
                 <Box sx={style}>
-                    <Typography variant="h4" sx={{textAlign: 'center', fontWeight: 'medium'}}>Add Income</Typography>
+                    <Typography variant="h4" sx={{textAlign: 'center', fontWeight: 'medium'}}>New Income</Typography>
 
                     {/* Title field */}
                     <TextField

@@ -146,7 +146,7 @@ const Dashboard = () => {
     }, [])    
 
     return (
-        <div>
+        <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '100vh'}}>
             
             <Container maxWidth="lg">
 

@@ -1,5 +1,5 @@
 import { db } from "../../config/firebase";
-import { collection, getDocs, limit, orderBy, query, where, Timestamp } from "firebase/firestore";
+import { collection, getDocs, limit, orderBy, query, where, Timestamp, doc, updateDoc } from "firebase/firestore";
 
 export const getUserInfo = async (currentUserToken) => {
     const querySnapshot = await getDocs(
@@ -56,4 +56,43 @@ export const GetAllCashflowData = async () => {
     const getCashflowData = await getDocs(cashflowRef);
 
     return getCashflowData.docs.map((doc) => ({ ...doc.data(), id: doc.id}))
+};
+
+export const GetFamilyMembers = async () => {
+    const memberRef = collection(db, "users");
+
+    const getFamilyMembers = await getDocs(memberRef);
+
+    return getFamilyMembers.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
+};
+
+export const GetPaymentInfo = async () => {
+    const paymentRef = collection(db, "payments");
+
+    const getPaymentInfo = await getDocs(paymentRef);
+
+    return getPaymentInfo.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
+};
+
+export const UpdateCardStatus = async (cardID, newStatus) => {
+    try {
+        const cardRef = doc(db, 'payments', cardID);
+        await updateDoc(cardRef, { status: newStatus });
+    } catch(err) {
+        console.error('Error updating card status!', err);
+    }
+};
+
+export const GetMemberOnCurrentToken = async (keyValue) => {
+    
+    const memberListRef = collection(db, 'users');
+
+    const getMemberOnToken = query(memberListRef, where("token", "==", keyValue));
+    const querySnapshot = await getDocs(getMemberOnToken);
+
+    if (!querySnapshot.empty) {
+       return querySnapshot.docs.map((doc) => ({ ...doc.data() }))
+    } else {
+        alert("No Users in this workspace!");
+    }
 };
