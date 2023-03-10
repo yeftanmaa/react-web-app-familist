@@ -1,4 +1,4 @@
-import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
+import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Select, MenuItem } from "@mui/material";
 import { Box, Container } from "@mui/system";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import React, { useEffect, useRef, useState } from "react";
@@ -6,16 +6,17 @@ import { auth, db } from "../../../config/firebase";
 import { getMonthName } from "../../utils/DateGenerator";
 import { FormatPrice } from "../../utils/PriceToString";
 import Chart from 'chart.js/auto';
-import { GetAllCashflowData, getAllChartDataByQuery, getTodayEarningByQuery } from "../../utils/firestoreUtils";
-import ModalAddIncome from "../../modals/AddIncome";
+import {  getAllChartDataByQuery } from "../../utils/firestoreUtils";
+// import ModalAddIncome from "../../modals/AddIncome";
 import AddIcon from '@mui/icons-material/Add';
-import RemoveIcon from '@mui/icons-material/Remove';
-import ModalAddExpense from "../../modals/AddExpense";
+import { FetchAllPayments } from "../../../hooks/useFetchPayments";
+// import ModalAddExpense from "../../modals/AddExpense";
 
 const Dashboard = () => {
 
     const chartRef = useRef(null);
     const [chartData, setChartData] = useState([]);
+    const [newChartData, setNewChartData] = useState([]);
     
     // Get chart data
     useEffect(() => {
@@ -27,25 +28,35 @@ const Dashboard = () => {
         fetchChartData();
     }, [])
 
+    // Get NEW chart data
+    useEffect(() => {
+        const fetchNewChartData = async () => {
+            const chartData = await FetchAllPayments();
+            setNewChartData(chartData);
+        };
+
+        fetchNewChartData();
+    }, [])
+
     // render chart when component is mounted
     useEffect(() => {
-        if (chartData.length) {
+        if (newChartData.length) {
             const myChart = new Chart(chartRef.current, {
-                type: 'line',
+                type: 'bar',
                 data: {
-                    labels: chartData
-                    .sort((a,b) => a.createdAt.seconds - b.createdAt.seconds)
+                    labels: newChartData
+                    .sort((a,b) => a.lastPaid.seconds - b.lastPaid.seconds)
                     .map((item) => {
-                        const dateObj =  item.createdAt.toDate();
+                        const dateObj =  item.lastPaid.toDate();
                         return dateObj.getDate();
                     }),
                     datasets: [
                         {
                             label: getMonthName() + " Financial Chart",
-                            data: chartData.map((item) => item.totalEarnings),
+                            data: newChartData.map((item) => item.amountPaid),
                             fill: true,
-                            backgroundColor: 'rgba(20, 76, 245, 0.16)',
-                            borderColor: 'rgba(20, 76, 245, 0.91)',
+                            backgroundColor: 'rgba(217, 0, 0, 0.06)',
+                            borderColor: 'rgba(224, 0, 0, 0.8)',
                             borderWidth: 2,
                             pointRadius: 6,
                             tension: 0.4
@@ -75,26 +86,95 @@ const Dashboard = () => {
                 myChart.destroy();
             };
         }
-    }, [chartData]);
+    }, [newChartData]);
 
     const currentUser = useRef(null);
-    const [latestEarning, setLatestEarning] = useState(0);
+    // const [latestEarning, setLatestEarning] = useState(0);
 
     // Get Today Earning
+    // useEffect(() => {
+    //     const fetchTodayEarning  = async() => {
+    //         const earning = await getTodayEarningByQuery('workspace-graph', 'createdAt', '<=', "desc");
+    //         setLatestEarning(earning);
+    //     };
+
+    //     fetchTodayEarning();
+    // }, []);
+
+    // Get payment info based on user month selection
+    const [selectedMonth, setSelectedMonth] = useState("March");
+    const [payments, setPayments] = useState([]);
+    const [highestExpense, setHighestExpense] = useState(0);
+    
+    // Get list of every month by selecting dropdown menu
     useEffect(() => {
-        const fetchTodayEarning  = async() => {
-            const earning = await getTodayEarningByQuery('workspace-graph', 'createdAt', '<=', "desc");
-            setLatestEarning(earning);
+        const fetchData = async () => {
+          const schedulerCol = collection(db, 'scheduler');
+          const schedulerQuery = query(schedulerCol);
+          const schedulerSnapshot = await getDocs(schedulerQuery);
+          const docs = [];
+      
+          for (const schedulerDoc of schedulerSnapshot.docs) {
+            const paymentsQuery = query(
+              collection(schedulerDoc.ref, 'payments'),
+              where('lastPaid', '>=', new Date(`${selectedMonth} 1, 2023`)),
+              where('lastPaid', '<=', new Date(`${selectedMonth} 31, 2023`)),
+            );
+            const paymentsSnapshot = await getDocs(paymentsQuery);
+      
+            if (!paymentsSnapshot.empty) {
+              const paymentDocs = paymentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+              docs.push({ id: schedulerDoc.id, ...schedulerDoc.data(), payments: paymentDocs });
+            }
+          }
+      
+          setPayments(docs);
         };
+      
+        if (selectedMonth) {
+          fetchData();
+        }
+    }, [selectedMonth]);
 
-        fetchTodayEarning();
-    }, []);
+    // Get highest expenses on current month
+    useEffect(() => {
+        const fetchData = async () => {
+          const schedulerCol = collection(db, 'scheduler');
+          const schedulerQuery = query(schedulerCol);
+          const schedulerSnapshot = await getDocs(schedulerQuery);
+          let highestPaid = 0;
+      
+          for (const schedulerDoc of schedulerSnapshot.docs) {
+            const paymentsQuery = query(
+              collection(schedulerDoc.ref, 'payments'),
+              where('lastPaid', '>=', new Date(new Date().getFullYear(), new Date().getMonth(), 1)),
+              where('lastPaid', '<=', new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)),
+            );
+            const paymentsSnapshot = await getDocs(paymentsQuery);
+      
+            if (!paymentsSnapshot.empty) {
+              paymentsSnapshot.forEach(doc => {
+                const amountPaid = doc.data().amountPaid;
+                if (amountPaid > highestPaid) {
+                  highestPaid = amountPaid;
+                }
+              });
+            }
+          }
+      
+          setHighestExpense(highestPaid);
+        };
+      
+        fetchData();
+      }, []);
+    
 
+    // Get current user that logged in
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(async (user) => {
             if (user) {
+
                 // import our collection in firestore
-                
                 const userDetails = collection(db, "users");
 
                 // get currentUser to be displayed on the bottom side of the page
@@ -115,16 +195,16 @@ const Dashboard = () => {
         return unsubscribe;
     })
 
-    const [openModal, setOpenModal] = useState(false);
+    // const [openModal, setOpenModal] = useState(false);
     const [openExpenseModal, setOpenExpenseModal] = useState(false);
     
-    const handleOpenModal = () => {
-        setOpenModal(true);
-    }
+    // const handleOpenModal = () => {
+    //     setOpenModal(true);
+    // }
 
-    const handleCloseModal = () => {
-        setOpenModal(false);
-    }
+    // const handleCloseModal = () => {
+    //     setOpenModal(false);
+    // }
 
     const handleOpenExpenseModal = () => {
         setOpenExpenseModal(true);
@@ -134,34 +214,35 @@ const Dashboard = () => {
         setOpenExpenseModal(false);
     }
     
-    const [cashflowData, setCashflowData] = useState([]);
+    // const [cashflowData, setCashflowData] = useState([]);
 
-    useEffect(() => {
-        const fetchCashflowData = async () => {
-            const cashflowData = await GetAllCashflowData();
-            setCashflowData(cashflowData);
-        }
+    // useEffect(() => {
+    //     const fetchCashflowData = async () => {
+    //         const cashflowData = await GetAllCashflowData();
+    //         setCashflowData(cashflowData);
+    //     }
 
-        fetchCashflowData();
-    }, [])    
+    //     fetchCashflowData();
+    // }, [])    
 
     return (
         <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '100vh'}}>
             
             <Container maxWidth="lg">
 
-                <Box display={"flex"} alignItems={"center"} marginTop={"30px"}>
-                    <Button startIcon={<RemoveIcon />} onClick={handleOpenExpenseModal} variant="contained" color="error" sx={{borderRadius: '7px'}}>Add Expense</Button>
-
-                    <Box flexGrow={1} textAlign={"center"}>
-                        <Typography variant="h6" fontWeight={400}>Current total earnings:</Typography>
-                        <Typography variant="h3" fontWeight={600} fontStyle={"normal"} color={"#1E8CF1"}>{FormatPrice(latestEarning)}</Typography>
+                <Box display={"flex"} alignItems={"center"} justifyContent="space-around" marginTop={"30px"}>
+                    <Box flexGrow={1}>
+                        <Typography variant="h6" fontWeight={400}>{getMonthName() + ' highest expenses:'}</Typography>
+                        <Typography variant="h3" fontWeight={600} fontStyle={"normal"} color={"#1E8CF1"}>{FormatPrice(highestExpense)}</Typography>
                     </Box>
 
-                    <Button startIcon={<AddIcon />} onClick={handleOpenModal} variant="contained" color="primary" sx={{borderRadius: '7px'}}>Add Income</Button>
 
-                    {openModal && <ModalAddIncome open={openModal} handleClose={handleCloseModal} onCloseClick={handleCloseModal} getLatestEarning={latestEarning} />}
-                    {openExpenseModal && <ModalAddExpense open={openExpenseModal} handleClose={handleCloseExpenseModal} onCloseClick={handleCloseExpenseModal} getLatestEarning={latestEarning} />}
+                    <Button startIcon={<AddIcon />} onClick={handleOpenExpenseModal} variant="contained" color="error" sx={{borderRadius: '7px'}}>Add Expense</Button>
+
+                    {/* <Button startIcon={<AddIcon />} onClick={handleOpenModal} variant="contained" color="primary" sx={{borderRadius: '7px'}}>Add Income</Button> */}
+
+                    {/* {openModal && <ModalAddIncome open={openModal} handleClose={handleCloseModal} onCloseClick={handleCloseModal} getLatestEarning={latestEarning} />} */}
+                    {/* {openExpenseModal && <ModalAddExpense open={openExpenseModal} handleClose={handleCloseExpenseModal} onCloseClick={handleCloseExpenseModal} getLatestEarning={latestEarning} />} */}
                 </Box>
                 
                 <div style={{width: "100%", marginTop: "30px", marginLeft: 'auto', marginRight: 'auto'}}>
@@ -169,35 +250,44 @@ const Dashboard = () => {
                 </div>
 
                 <div style={{margin: 'auto', width: '100%', marginTop: '65px'}}>
-                    <Typography variant="h4" sx={{marginBottom: '20px'}}>Cashflow History</Typography>
-                    <TableContainer sx={{height:'600px', overflowY: 'auto', borderRadius: '10px', backgroundColor: 'rgb(250,250,250)', p: 1, marginBottom: '30px'}}>
+
+                    <Box display={"flex"} justifyContent={"space-between"}>
+                        <Typography variant="h4" sx={{marginBottom: '20px'}}>Cashflow History</Typography>
+
+                        <Select size="small" sx={{padding: '0 20px', marginBottom: '20px'}} value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)}>
+                            <MenuItem value="January">January</MenuItem>
+                            <MenuItem value="February">February</MenuItem>
+                            <MenuItem value="March">March</MenuItem>
+                            <MenuItem value="April">April</MenuItem>
+                            <MenuItem value="May">May</MenuItem>
+                            <MenuItem value="June">June</MenuItem>
+                            <MenuItem value="July">July</MenuItem>
+                            <MenuItem value="August">August</MenuItem>
+                            <MenuItem value="September">September</MenuItem>
+                            <MenuItem value="October">October</MenuItem>
+                            <MenuItem value="November">November</MenuItem>
+                            <MenuItem value="December">December</MenuItem>
+                        </Select>
+                    </Box>
+
+                    <TableContainer sx={{borderRadius: '10px', backgroundColor: 'rgb(250,250,250)', marginBottom: '30px'}}>
                         <Table>
                             <TableHead>
                                 <TableRow>
-                                    <TableCell sx={{fontWeight: 600, fontSize: 15}}>Date</TableCell>
-                                    <TableCell sx={{fontWeight: 600, fontSize: 15, textAlign: 'center'}}>Type</TableCell>
                                     <TableCell sx={{fontWeight: 600, fontSize: 15}}>Title</TableCell>
-                                    <TableCell sx={{fontWeight: 600, fontSize: 15}}>Details</TableCell>
-                                    <TableCell sx={{fontWeight: 600, fontSize: 15}}>Amount</TableCell>
-                                    <TableCell sx={{fontWeight: 600, fontSize: 15, textAlign: 'right'}}>Total Current Money</TableCell>
+                                    <TableCell sx={{fontWeight: 600, fontSize: 15}}>Date Paid</TableCell>
+                                    <TableCell sx={{fontWeight: 600, fontSize: 15}}>Amount Paid</TableCell>
+                                    <TableCell sx={{fontWeight: 600, fontSize: 15}}>Remaining Payment</TableCell>
                                 </TableRow>
                             </TableHead>
 
                             <TableBody>
-                                {cashflowData
-                                .sort((a, b) => b.createdAt.seconds - a.createdAt.seconds)
-                                .map((cashdata) => (
-                                    <TableRow key={cashdata.id}>
-                                        <TableCell>{new Date(cashdata.createdAt.seconds * 1000).toLocaleDateString()}</TableCell>
-                                        <TableCell>
-                                            <Box bgcolor={cashdata.type === 'Income' ? 'rgba(20, 202, 9, 0.87)' : 'rgba(234, 71, 71, 0.95)'} sx={{padding: '4px 9px', fontSize: '13px', color: 'white', borderRadius: '50px', textAlign: 'center'}}>
-                                                {cashdata.type === 'Income' ? 'Income' : 'Expenses'}
-                                            </Box>
-                                        </TableCell>
-                                        <TableCell>{cashdata.title}</TableCell>
-                                        <TableCell>{cashdata.description}</TableCell>
-                                        <TableCell>{cashdata.amount.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}</TableCell>
-                                        <TableCell sx={{ textAlign: 'right'}}>{cashdata.totalEarnings.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}</TableCell>
+                                {payments.map((scheduler) => (
+                                    <TableRow key={scheduler.id}>
+                                        <TableCell>{scheduler.title}</TableCell>
+                                        <TableCell>{scheduler.payments && scheduler.payments[0]?.lastPaid?.toDate().toLocaleDateString()}</TableCell>
+                                        <TableCell>{scheduler.payments && scheduler.payments[0]?.amountPaid.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}</TableCell>
+                                        <TableCell>{scheduler.payments && scheduler.payments[0]?.remainingBill.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}</TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>

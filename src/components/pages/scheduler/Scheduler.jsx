@@ -49,7 +49,7 @@ const Scheduler = () => {
         };
 
         fetchData();
-    })
+    }, [])
 
     const [openModal, setOpenModal] = useState(false);
     const [openDeleteModal, setOpenDeleteModal] = useState(false);
