@@ -5,24 +5,51 @@ import AddIcon from '@mui/icons-material/Add'
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ModalAddScheduler from "../../modals/AddScheduler";
-import { getAllSchedulerData } from "../../utils/firestoreUtils";
+// import { getAllSchedulerData } from "../../utils/firestoreUtils";
 import ModalDeleteScheduler from "../../modals/DeleteScheduler";
 import ModalEditScheduler from "../../modals/EditScheduler";
 import ModalSchedulerDetails from "../../modals/DetailScheduler";
 import { ArrowDownward, ArrowUpward } from "@mui/icons-material";
+import { db } from "../../../config/firebase";
+import { collection, getDocs, limit, orderBy, query } from "firebase/firestore";
 
 const Scheduler = () => {
 
-    const [schedulerData, setSchedulerData] = useState([]);
+    // const [schedulerData, setSchedulerData] = useState([]);
+
+    // useEffect(() => {
+    //     const fetchSchedulerData = async () => {
+    //         const schedulerData = await getAllSchedulerData();
+    //         setSchedulerData(schedulerData);
+    //     }
+
+    //     fetchSchedulerData();
+    // }, [])
+
+    const [data, setData] = useState([]);
 
     useEffect(() => {
-        const fetchSchedulerData = async () => {
-            const schedulerData = await getAllSchedulerData();
-            setSchedulerData(schedulerData);
-        }
+        const fetchData = async () => {
+            const schedulerCol = collection(db, 'scheduler');
+            const schedulerQuery = query(schedulerCol);
+            const schedulerSnapshot = await getDocs(schedulerQuery);
+            const docs = [];
+        
+            for (const schedulerDoc of schedulerSnapshot.docs) {
+                const paymentsQuery = query(collection(schedulerDoc.ref, 'payments'), orderBy('lastPaid', 'desc'), limit(1));
+                const paymentsSnapshot = await getDocs(paymentsQuery);
+        
+                if (!paymentsSnapshot.empty) {
+                const paymentDoc = paymentsSnapshot.docs[0];
+                docs.push({ id: schedulerDoc.id, ...schedulerDoc.data(), payment: { id: paymentDoc.id, ...paymentDoc.data() } });
+                }
+            }
+        
+            setData(docs);
+        };
 
-        fetchSchedulerData();
-    }, [])
+        fetchData();
+    })
 
     const [openModal, setOpenModal] = useState(false);
     const [openDeleteModal, setOpenDeleteModal] = useState(false);
@@ -30,8 +57,11 @@ const Scheduler = () => {
     const [openDetailModal, setOpenDetailModal] = useState(false);
     const [selectDocumentId, setSelectDocumentId] = useState('');
     const [selectSchedulerTitle, setSelectSchedulerTitle] = useState('');
-    const [selectSchedulerDesc, setSelectSchedulerDesc] = useState('');
     const [selectSchedulerType, setSelectSchedulerType] = useState('');
+    const [selectSchedulerLastPaid, setSelectSchedulerLastPaid] = useState('');
+    const [selectSchedulerAmountPaid, setSelectSchedulerAmountPaid] = useState('');
+    const [selectSchedulerRemainingBill, setSelectSchedulerRemainingBill] = useState('');
+    const [selectSchedulerTotalBill, setSelectSchedulerTotalBill] = useState('');
 
     const handleOpenModal = () => {
         setOpenModal(true);
@@ -50,9 +80,8 @@ const Scheduler = () => {
         setOpenDeleteModal(false);
     }
 
-    const handleOpenEditModal = (desc, title, type, id) => {
+    const handleOpenEditModal = (title, type, id) => {
         setOpenEditModal(true);
-        setSelectSchedulerDesc(desc);
         setSelectSchedulerTitle(title);
         setSelectSchedulerType(type);
         setSelectDocumentId(id);
@@ -62,11 +91,14 @@ const Scheduler = () => {
         setOpenEditModal(false);
     }
 
-    const handleOpenDetailModal = (desc, title, type) => {
+    const handleOpenDetailModal = (title, type, lastPaid, amountPaid, remainingBill, totalBill) => {
         setOpenDetailModal(true);
-        setSelectSchedulerDesc(desc);
         setSelectSchedulerTitle(title);
         setSelectSchedulerType(type);
+        setSelectSchedulerLastPaid(lastPaid);
+        setSelectSchedulerAmountPaid(amountPaid);
+        setSelectSchedulerRemainingBill(remainingBill);
+        setSelectSchedulerTotalBill(totalBill);
     }
 
     const handleCloseDetailModal = () => {
@@ -99,11 +131,11 @@ const Scheduler = () => {
         }
     }
 
-    const sortedData = schedulerData.slice().sort((a, b) => {
+    const sortedData = data.slice().sort((a, b) => {
         if (sortColumn === 'title') {
             return (sortOrder === 'asc' ? 1 : -1) * (a.title > b.title ? 1 : -1);
-        } else if (sortColumn === 'type') {
-            return (sortOrder === 'asc' ? 1 : -1) * (a.type > b.type ? 1 : -1);
+        } else if (sortColumn === 'deadline') {
+            return (sortOrder === 'asc' ? 1 : -1) * (a.deadline > b.deadline ? 1 : -1);
         } else {
             return 0;
         }
@@ -121,8 +153,13 @@ const Scheduler = () => {
         }
     }
 
+    // get next month
+    const today = new Date();
+    const nextMonthWithYear = (today.getMonth() + 2) + '/' + (today.getFullYear());
+
     return (
         <div>
+
             <Container>
                 <Box display={"flex"} alignItems={"center"} marginTop={"20px"}>
                     <Typography flexGrow={1} variant="h4" fontWeight={500}>Scheduled Payments</Typography>
@@ -141,12 +178,11 @@ const Scheduler = () => {
                                         Title {sortIcon('title')}
                                     </Box>
                                 </TableCell>
-                                <TableCell onClick={() => handleSort('type')} sx={{fontWeight: 600, fontSize: 15,  cursor: 'pointer', display: 'flex', gap: '10px'}}>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px'}}>
-                                        Type {sortIcon('type')}
-                                    </Box>
+                                <TableCell onClick={() => handleSort('deadline')} sx={{fontWeight: 600, fontSize: 15,  cursor: 'pointer', display: 'flex', gap: '10px'}}>
+                                    Deadline {sortIcon('deadline')}
                                 </TableCell>
-                                <TableCell sx={{fontWeight: 600, fontSize: 15}}>Status</TableCell>
+                                <TableCell sx={{fontWeight: 600, fontSize: 15}}>Last Paid</TableCell>
+                                <TableCell sx={{fontWeight: 600, fontSize: 15}}>Next Payment</TableCell>
                                 <TableCell sx={{fontWeight: 600, fontSize: 15}} align="center">Action</TableCell>
                             </TableRow>
                         </TableHead>
@@ -157,10 +193,10 @@ const Scheduler = () => {
                                 : sortedData
                             ).map((item) => (
                                 <TableRow key={item.id}>
-                                    <TableCell><Link component="button" sx={{fontWeight: 500, fontSize: 15, textDecoration: 'none', color: '#0047FF'}} onClick={() => {handleOpenDetailModal(item.desc, item.title, item.type, item.id)}}>{item.title}</Link></TableCell>
-                                    <TableCell>{item.type}</TableCell>
-                                    <TableCell>Active</TableCell>
-
+                                    <TableCell><Link component="button" sx={{fontWeight: 500, fontSize: 15, textDecoration: 'none', color: '#0047FF'}} onClick={() => {handleOpenDetailModal(item.title, item.type, item.payment.lastPaid.toDate().toLocaleString(), item.fixedBill === undefined ? item.payment.amountPaid : item.fixedBill, item.isCicilan === true ? item.payment.remainingBill : 0, item.isCicilan === true ? item.totalBills : 0)}}>{item.title}</Link></TableCell>
+                                    <TableCell>{item.deadline}</TableCell>
+                                    <TableCell>{item.payment.lastPaid.toDate().toLocaleString()}</TableCell>
+                                    <TableCell>{item.deadline.substring(0, 2) + "/" + nextMonthWithYear}</TableCell>
                                     <TableCell align="center">
                                         <IconButton onClick={() => handleOpenEditModal(item.desc, item.title, item.type, item.id)} size="large">
                                             <EditIcon color="primary" />
@@ -179,8 +215,12 @@ const Scheduler = () => {
                                     handleClose={handleCloseDetailModal}
                                     onCloseClick={handleCloseDetailModal}
                                     title={selectSchedulerTitle}
-                                    desc={selectSchedulerDesc}
                                     type={selectSchedulerType}
+                                    lastPaid={selectSchedulerLastPaid}
+                                    amountPaid={selectSchedulerAmountPaid}
+                                    remainingBill={selectSchedulerRemainingBill}
+                                    totalBill={selectSchedulerTotalBill}
+                                    
                                 />
                                 )
 
@@ -201,7 +241,6 @@ const Scheduler = () => {
                                     handleClose={handleCloseEditModal}
                                     onCloseClick={handleCloseEditModal}
                                     title={selectSchedulerTitle}
-                                    desc={selectSchedulerDesc}
                                     type={selectSchedulerType}
                                     id={selectDocumentId}
                                 />)
@@ -213,7 +252,7 @@ const Scheduler = () => {
                     <TablePagination
                         rowsPerPageOptions={[5, 10, 25]}
                         component="div"
-                        count={schedulerData.length}
+                        count={data.length}
                         rowsPerPage={rowsPerPage}
                         page={page}
                         onPageChange={handleChangePage}
