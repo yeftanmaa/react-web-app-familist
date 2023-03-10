@@ -19,8 +19,10 @@ const Registration = () => {
     const [getToken, setToken] = useState("");
     const [newName, setNewName] = useState("");
     const [newEmail, setNewEmail] = useState("");
+    const [newPhoneNumber, setNewPhoneNumber] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [typeOfUser, setTypeOfUser] = useState("");
 
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
@@ -43,6 +45,11 @@ const Registration = () => {
 
         // check if password and confirmPassword are matched
         if (newPassword === confirmPassword) {
+            
+            if (typeOfUser === 'Normal User') {
+                setToken('n4th4nSpace');
+            }
+
             try {
                 // create a new user in Firebase Auth
                 const { user } = await createUserWithEmailAndPassword(auth, newEmail, newPassword);
@@ -54,6 +61,8 @@ const Registration = () => {
                 await addDoc(userCollectionRef, {
                     name: newName,
                     email: newEmail,
+                    phone: newPhoneNumber,
+                    description: 'Hi, I am new to Familist!',
                     password: newPassword,
                     token: getToken
                 });
@@ -105,7 +114,7 @@ const Registration = () => {
         setOpen(false);
     };
 
-    const [typeOfUser, setTypeOfUser] = useState("");
+    
     console.log(typeOfUser);
 
     // Toggle button
@@ -158,6 +167,20 @@ const Registration = () => {
                             size="small"
                             onChange={(e) => setNewEmail(e.target.value)}
                             placeholder="Set your email address"
+                            style={{width: '300px', margin: '10px 0'}}
+                            inputProps={{style: {fontSize: 15}}}
+                        />
+                    </Box>
+
+                    {/* Phone Input */}
+                    <Box>
+                        <TextField
+                            id="outlined-password-input"
+                            label="Phone Number"
+                            type="number"
+                            size="small"
+                            onChange={(e) => setNewPhoneNumber(e.target.value)}
+                            placeholder="Set your phone number"
                             style={{width: '300px', margin: '10px 0'}}
                             inputProps={{style: {fontSize: 15}}}
                         />
