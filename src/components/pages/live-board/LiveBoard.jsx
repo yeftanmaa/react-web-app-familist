@@ -1,18 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
-import { Fab, IconButton, Typography, Avatar, InputLabel, Select, MenuItem } from "@mui/material";
+import { Fab, Typography, Avatar, InputLabel, Select, MenuItem } from "@mui/material";
 import { Box, Container } from "@mui/system";
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import ModalEditTask from "../../modals/EditTask";
-import ModalDeleteTask from "../../modals/DeleteTask";
+import { collection, query, getDocs, orderBy, limit } from "firebase/firestore";
+import { db } from "../../../config/firebase";
 import AddIcon from '@mui/icons-material/Add';
 import ModalAddTask from "../../modals/AddTask";
-import { GetMemberOnCurrentToken, GetPaymentInfo, UpdateCardStatus } from "../../utils/firestoreUtils";
+import { GetMemberOnCurrentToken } from "../../utils/firestoreUtils";
+import { getNextMonthName } from '../../utils/DateGenerator';
 
 function App() {
-
-  const [taskCard, setTaskCard] = useState([]);
   
   // retrieve member list of current workspace
   const [memberList, setMemberList] = useState([]);
@@ -33,108 +30,59 @@ function App() {
     setSelectedAssignee(e.target.value);
   };
 
-  useEffect(() => {
-    const fetchCardData = async () => {
-      const cardData = await GetPaymentInfo();
-      setTaskCard(cardData);
-    }
+  const [data, setData] = useState([]);
+  const currentMonth = new Date().toLocaleDateString().substring(0, 1);
+  const currentYear = new Date().getFullYear();
 
-    fetchCardData();
+  useEffect(() => {
+      const fetchData = async () => {
+          const schedulerCol = collection(db, 'scheduler');
+          const schedulerQuery = query(schedulerCol);
+          const schedulerSnapshot = await getDocs(schedulerQuery);
+          const docs = [];
+      
+          for (const schedulerDoc of schedulerSnapshot.docs) {
+              const paymentsQuery = query(collection(schedulerDoc.ref, 'payments'), orderBy('lastPaid', 'desc'), limit(1));
+              const paymentsSnapshot = await getDocs(paymentsQuery);
+      
+              if (!paymentsSnapshot.empty) {
+              const paymentDoc = paymentsSnapshot.docs[0];
+              docs.push({ id: schedulerDoc.id, ...schedulerDoc.data(), payment: { id: paymentDoc.id, ...paymentDoc.data() } });
+              }
+          }
+      
+          setData(docs);
+      };
+
+      fetchData();
   }, [])
 
   useEffect(() => {
     const taskStatus = {
-      topay: {
-        name: "To Pay",
-        items: taskCard.filter(task => task.status === 'topay' && (selectedAssignee === '' || task.assignee === selectedAssignee))
+      nextpayment: {
+        name: "Next Payment",
+        // Display all data to show user incoming payment on next month
+        items: data
       },
-      inprogress: {
-        name: "In Progress",
-        items: taskCard.filter(task => task.status === 'inprogress' && (selectedAssignee === '' || task.assignee === selectedAssignee))
+      notpaid: {
+        name: "Not Paid",
+        // Display all data on this month that user has not paid yet
+        items: data.filter(task => task.payment && task.payment.lastPaid && task.payment.lastPaid.toDate().toLocaleDateString().substring(0, 1) !== currentMonth)
       },
-      done: {
-        name: "Done",
-        items: taskCard.filter(task => task.status === 'done' && (selectedAssignee === '' || task.assignee === selectedAssignee))
+      paid: {
+        name: "Paid",
+        // Display all data on this month that user has paid
+        items: data.filter(task => task.payment && task.payment.lastPaid && task.payment.lastPaid.toDate().toLocaleDateString().substring(0, 1) === currentMonth)
       }
     };
 
     setColumns(taskStatus);
-  }, [taskCard, selectedAssignee])
-  
-  const onDragEnd = (result, columns, setColumns) => {
-    if (!result.destination) return;
-    const { source, destination } = result;
-  
-    if (source.droppableId !== destination.droppableId) {
-      const sourceColumn = columns[source.droppableId];
-      const destColumn = columns[destination.droppableId];
-      const sourceItems = [...sourceColumn.items];
-      const destItems = [...destColumn.items];
-      const [removed] = sourceItems.splice(source.index, 1);
-      destItems.splice(destination.index, 0, removed);
-
-      UpdateCardStatus(removed.id, destination.droppableId);
-
-      setColumns({
-        ...columns,
-        [source.droppableId]: {
-          ...sourceColumn,
-          items: sourceItems
-        },
-        [destination.droppableId]: {
-          ...destColumn,
-          items: destItems
-        }
-      });
-    } else {
-      const column = columns[source.droppableId];
-      const copiedItems = [...column.items];
-      const [removed] = copiedItems.splice(source.index, 1);
-      copiedItems.splice(destination.index, 0, removed);
-      setColumns({
-        ...columns,
-        [source.droppableId]: {
-          ...column,
-          items: copiedItems
-        }
-      });
-    }
-  };
+  }, [data, currentMonth])
   
   const [columns, setColumns] = useState({});
-  const [selectDocumentId, setSelectDocumentId] = useState('');
-  const [selectTaskTitle, setSelectTaskTitle] = useState('');
-  const [selectTaskDesc, setSelectTaskDesc] = useState('');
-  const [selectTaskPrice, setSelectTaskPrice] = useState('');
-  const [selectTaskAssignee, setSelectTaskAssignee] = useState('');
 
   // modal handler
-  const [openDeleteModal, setOpenDeleteModal] = useState(false);
-  const [openEditModal, setOpenEditModal] = useState(false);
   const [openAddModal, setOpenAddModal] = useState(false);
-
-  const handleOpenDeleteModal = (id) => {
-    setOpenDeleteModal(true);
-    setSelectDocumentId(id);
-
-  };
-
-  const handleCloseDeleteModal = () => {
-    setOpenDeleteModal(false);
-  };
-
-  const handleOpenEditModal = (desc, priceEstimation, title, assignee, id) => {
-    setOpenEditModal(true);
-    setSelectTaskDesc(desc);
-    setSelectTaskPrice(priceEstimation);
-    setSelectTaskTitle(title);
-    setSelectDocumentId(id);
-    setSelectTaskAssignee(assignee);
-  };
-
-  const handleCloseEditModal = () => {
-    setOpenEditModal(false);
-  };
 
   const handleOpenAddModal = () => {
     setOpenAddModal(true);
@@ -144,7 +92,6 @@ function App() {
     setOpenAddModal(false);
   };
 
-  
   return (
     <div>
       <Container maxWidth="xl">
@@ -181,9 +128,7 @@ function App() {
             width: '100%'
           }}
         >
-          <DragDropContext
-            onDragEnd={(result) => onDragEnd(result, columns, setColumns)}
-          >
+          <DragDropContext>
             {/* Loop through taskStatus objects and makes 4 droppable columns */}
             {Object.entries(columns).map(([columnId, column], index) => {
               return (
@@ -199,7 +144,7 @@ function App() {
 
                   <div>
                     {/* this part is where each column getting droppable */}
-                    <Droppable droppableId={columnId} key={columnId}>
+                    <Droppable>
                       {(provided, snapshot) => {
                         return (
                           <div
@@ -220,11 +165,7 @@ function App() {
                             {column.items.map((item, index) => {
                               return (
                                 // then we make each cards is draggable
-                                <Draggable
-                                  key={item.id}
-                                  draggableId={item.id}
-                                  index={index}
-                                >
+                                <Draggable>
                                   {(provided, snapshot) => {
                                     return (
                                       <div
@@ -246,28 +187,55 @@ function App() {
                                           ...provided.draggableProps.style
                                         }}
                                       >
-                                        <Box position={"absolute"} top={7} right={7}>
-                                          <IconButton onClick={() => handleOpenEditModal(item.desc, item.priceEstimation, item.title, item.assignee, item.id)}>
-                                            <EditIcon color="primary" />
-                                          </IconButton>
-
-                                          <IconButton onClick={() => handleOpenDeleteModal(item.id)}>
-                                            <DeleteIcon color="error" />
-                                          </IconButton>
+                                        <Box position={"absolute"} top={13} right={11}>
+                                          <Box>
+                                            {
+                                              item.isCicilan ? (
+                                                <Box sx={{backgroundColor: '#aa16db', padding: '3px 10px', borderRadius: '20px'}}>
+                                                  <Typography variant="caption" color={"white"}>Cicilan</Typography>
+                                                </Box>
+                                              ) : (
+                                                <Box sx={{backgroundColor: 'rgba(36, 79, 255, 0.8)', padding: '3px 10px', borderRadius: '20px'}}>
+                                                  <Typography variant="caption" color={"white"}>Tagihan Reguler</Typography>
+                                                </Box>
+                                            )}
+                                          </Box>
                                         </Box>
                                         
                                         <Typography>{item.title}</Typography>
 
                                         <Box sx={{maxWidth: '260px', marginTop: 1}}>
-                                          <Typography fontStyle={'italic'} sx={{ fontSize: 14, color: '#C9C9C9'}}>{item.desc}</Typography>
+                                          <Typography sx={{ fontSize: 13, color: 'black'}}>
+                                            {
+                                              (columnId === 'nextpayment') ? '' :
+                                              (columnId === 'notpaid') ? 'Tenggat waktu: ' + item.deadline.substring(0, 2) + '/' + currentMonth + '/2023' :
+                                              (item.isCicilan) ? 'Sisa pembayaran: ' + item.payment.remainingBill.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })
+                                              : 'undefined'
+                                            }
+                                          </Typography>
+
+                                          <Typography fontStyle={'italic'} sx={{ fontSize: 13, color: '#C9C9C9'}}>
+                                            {
+                                              (columnId === 'nextpayment') ? "Next Payment: " + getNextMonthName() + ' ' + currentYear :
+                                              (columnId === 'notpaid') ? 'Terakhir dibayar: ' + item.payment.lastPaid.toDate().toLocaleDateString() :
+                                              (columnId === 'paid') ? 'Paid on: ' + item.payment.lastPaid.toDate().toLocaleDateString()
+                                              : 'undefined'
+                                            }
+                                          </Typography>
+
                                         </Box>
 
                                         <Box position={"absolute"} bottom={10} left={15}>
-                                          <Typography variant="h6" sx={{color: '#D14E4E', fontWeight: 600, fontSize: '16px'}} >{item.priceEstimation.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}</Typography>
+                                          <Typography variant="h6" sx={{color: '#c4183b', fontWeight: 600, fontSize: '16px'}} >
+                                            {
+                                              (item.fixedBill === undefined && columnId !== 'nextpayment') ? item.payment.amountPaid?.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' }) :
+                                              (columnId === 'nextpayment' && item.fixedBill === undefined) ? (<Typography color={'grey'}>Not measured</Typography>) :
+                                              item.fixedBill?.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })
+                                            }
+                                          </Typography>
                                         </Box>
 
                                         <Box position={"absolute"} bottom={10} right={10} display={"flex"} alignItems={"center"} gap={1}>
-                                          <Typography variant="h6" sx={{fontWeight: 400, fontSize: '14px'}} >{item.assignee}</Typography>
                                           <Avatar sx={{width: 32, height: 32, fontSize: 15}}>T</Avatar>
                                         </Box>
                                         
@@ -295,28 +263,6 @@ function App() {
             open={openAddModal}
             handleClose={handleCloseAddModal}
             onCloseClick={handleCloseAddModal}
-          />
-        )}
-
-        {openEditModal && (
-          <ModalEditTask
-            open={openEditModal}
-            handleClose={handleCloseEditModal}
-            onCloseClick={handleCloseEditModal}
-            desc={selectTaskDesc}
-            priceEstimation={selectTaskPrice}
-            assignee={selectTaskAssignee}
-            title={selectTaskTitle}
-            id={selectDocumentId}
-          />
-        )}
-
-        {openDeleteModal && (
-          <ModalDeleteTask
-            open={openDeleteModal}
-            handleClose={handleCloseDeleteModal}
-            onCloseClick={handleCloseDeleteModal}
-            docID={selectDocumentId}
           />
         )}
       </Container>

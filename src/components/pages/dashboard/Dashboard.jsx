@@ -7,7 +7,7 @@ import { getMonthName } from "../../utils/DateGenerator";
 import { FormatPrice } from "../../utils/PriceToString";
 import Chart from 'chart.js/auto';
 import AddIcon from '@mui/icons-material/Add';
-import ModalAddExpense from "../../modals/AddExpense";
+import ModalPayBills from "../../modals/PayBills";
 import CircularProgress from '@mui/material/CircularProgress';
 
 const Dashboard = () => {
@@ -98,7 +98,7 @@ const Dashboard = () => {
                     labels: payments.map((ordered) => ordered.title),
                     datasets: [
                         {
-                            label: getMonthName() + " Financial Chart",
+                            label: selectedMonth + " Financial Chart",
                             data: payments.map((item) => item.payments[0].amountPaid),
                             fill: true,
                             backgroundColor: 'rgba(217, 0, 0, 0.06)',
@@ -132,7 +132,7 @@ const Dashboard = () => {
                 myChart.destroy();
             };
         }
-    }, [payments]);
+    }, [payments, selectedMonth]);
 
     // Modal handling
     const [openExpenseModal, setOpenExpenseModal] = useState(false);
@@ -151,13 +151,28 @@ const Dashboard = () => {
             <Container maxWidth="lg">
 
                 <Box display={"flex"} alignItems={"center"} justifyContent="space-around" marginTop={"30px"}>
-                    <Box flexGrow={1}>
+                    <Select size="small" sx={{ textAlign: 'left', marginBottom: '20px'}} value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)}>
+                        <MenuItem value="January">January</MenuItem>
+                        <MenuItem value="February">February</MenuItem>
+                        <MenuItem value="March">March</MenuItem>
+                        <MenuItem value="April">April</MenuItem>
+                        <MenuItem value="May">May</MenuItem>
+                        <MenuItem value="June">June</MenuItem>
+                        <MenuItem value="July">July</MenuItem>
+                        <MenuItem value="August">August</MenuItem>
+                        <MenuItem value="September">September</MenuItem>
+                        <MenuItem value="October">October</MenuItem>
+                        <MenuItem value="November">November</MenuItem>
+                        <MenuItem value="December">December</MenuItem>
+                    </Select>
+
+                    <Box flexGrow={1} textAlign="center">
                         <Typography variant="h6" fontSize={"18px"} fontWeight={400}>{ selectedMonth + ' highest expenses:'}</Typography>
                         <Typography variant="h3" fontWeight={600} fontStyle={"normal"} color={"#1E8CF1"}>{FormatPrice(highestExpense)}</Typography>
                     </Box>
 
                     <Button startIcon={<AddIcon />} onClick={handleOpenExpenseModal} variant="contained" color="error" sx={{borderRadius: '7px'}}>Pay Bill</Button>
-                    {openExpenseModal && <ModalAddExpense open={openExpenseModal} handleClose={handleCloseExpenseModal} onCloseClick={handleCloseExpenseModal} />}
+                    {openExpenseModal && <ModalPayBills open={openExpenseModal} handleClose={handleCloseExpenseModal} onCloseClick={handleCloseExpenseModal} />}
                 </Box>
                 
                 <div style={{width: "100%", marginTop: "30px", marginLeft: 'auto', marginRight: 'auto'}}>
@@ -166,24 +181,7 @@ const Dashboard = () => {
 
                 <div style={{margin: 'auto', width: '100%', marginTop: '65px'}}>
 
-                    <Box display={"flex"} justifyContent={"space-between"}>
-                        <Typography variant="h4" sx={{marginBottom: '20px'}}>Cashflow History</Typography>
-
-                        <Select size="small" sx={{ textAlign: 'left', marginBottom: '20px'}} value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)}>
-                            <MenuItem value="January">January</MenuItem>
-                            <MenuItem value="February">February</MenuItem>
-                            <MenuItem value="March">March</MenuItem>
-                            <MenuItem value="April">April</MenuItem>
-                            <MenuItem value="May">May</MenuItem>
-                            <MenuItem value="June">June</MenuItem>
-                            <MenuItem value="July">July</MenuItem>
-                            <MenuItem value="August">August</MenuItem>
-                            <MenuItem value="September">September</MenuItem>
-                            <MenuItem value="October">October</MenuItem>
-                            <MenuItem value="November">November</MenuItem>
-                            <MenuItem value="December">December</MenuItem>
-                        </Select>
-                    </Box>
+                    <Typography variant="h4" sx={{marginBottom: '20px'}}>Cashflow History</Typography>
 
                     <TableContainer sx={{borderRadius: '10px', backgroundColor: 'rgb(250,250,250)', marginBottom: '30px'}}>
                         {isLoading ? (
@@ -205,7 +203,7 @@ const Dashboard = () => {
                                         <TableCell>{scheduler.title}</TableCell>
                                         <TableCell>{scheduler.payments && scheduler.payments[0]?.lastPaid?.toDate().toLocaleDateString()}</TableCell>
                                         <TableCell>{scheduler.payments && scheduler.payments[0]?.amountPaid?.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}</TableCell>
-                                        <TableCell>{scheduler.payments && scheduler.payments[0]?.remainingBill?.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}</TableCell>
+                                        <TableCell>{scheduler.payments && scheduler.payments[0]?.remainingBill === undefined ? 'Rp 0,00' : scheduler.payments[0]?.remainingBill?.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' }) }</TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>

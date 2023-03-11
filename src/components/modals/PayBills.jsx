@@ -18,8 +18,7 @@ const style = {
     p: 4,
 };
 
-const ModalAddExpense = ({open, handleClose, onCloseClick, getLatestEarning}) => {
-
+const ModalPayBills = ({open, handleClose, onCloseClick, getLatestEarning}) => {
     const [expenseTitle, setExpenseTitle] = useState("");
     const [expenseDesc, setExpenseDesc] = useState("");
     const [expense, setExpense] = useState(0);
@@ -150,4 +149,4 @@ const ModalAddExpense = ({open, handleClose, onCloseClick, getLatestEarning}) =>
     );
 }
  
-export default ModalAddExpense;
+export default ModalPayBills;
