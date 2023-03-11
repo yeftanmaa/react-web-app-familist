@@ -1,175 +1,20 @@
 import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Select, MenuItem } from "@mui/material";
 import { Box, Container } from "@mui/system";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
 import React, { useEffect, useRef, useState } from "react";
 import { auth, db } from "../../../config/firebase";
 import { getMonthName } from "../../utils/DateGenerator";
 import { FormatPrice } from "../../utils/PriceToString";
 import Chart from 'chart.js/auto';
-import {  getAllChartDataByQuery } from "../../utils/firestoreUtils";
-// import ModalAddIncome from "../../modals/AddIncome";
 import AddIcon from '@mui/icons-material/Add';
-import { FetchAllPayments } from "../../../hooks/useFetchPayments";
-// import ModalAddExpense from "../../modals/AddExpense";
+import ModalAddExpense from "../../modals/AddExpense";
+import CircularProgress from '@mui/material/CircularProgress';
 
 const Dashboard = () => {
 
-    const chartRef = useRef(null);
-    const [chartData, setChartData] = useState([]);
-    const [newChartData, setNewChartData] = useState([]);
-    
-    // Get chart data
-    useEffect(() => {
-        const fetchChartData = async () => {
-            const chartData = await getAllChartDataByQuery("workspace-graph");
-            setChartData(chartData);
-        };
-
-        fetchChartData();
-    }, [])
-
-    // Get NEW chart data
-    useEffect(() => {
-        const fetchNewChartData = async () => {
-            const chartData = await FetchAllPayments();
-            setNewChartData(chartData);
-        };
-
-        fetchNewChartData();
-    }, [])
-
-    // render chart when component is mounted
-    useEffect(() => {
-        if (newChartData.length) {
-            const myChart = new Chart(chartRef.current, {
-                type: 'bar',
-                data: {
-                    labels: newChartData
-                    .sort((a,b) => a.lastPaid.seconds - b.lastPaid.seconds)
-                    .map((item) => {
-                        const dateObj =  item.lastPaid.toDate();
-                        return dateObj.getDate();
-                    }),
-                    datasets: [
-                        {
-                            label: getMonthName() + " Financial Chart",
-                            data: newChartData.map((item) => item.amountPaid),
-                            fill: true,
-                            backgroundColor: 'rgba(217, 0, 0, 0.06)',
-                            borderColor: 'rgba(224, 0, 0, 0.8)',
-                            borderWidth: 2,
-                            pointRadius: 6,
-                            tension: 0.4
-                        },
-                    ],
-                },
-                options: {
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                stepSize: 500000
-                            }
-                        },
-                        
-                        x: {
-                            grid: {
-                                display : false
-                            }
-                            
-                        }
-                    },
-                },
-            });
-
-            return () => {
-                myChart.destroy();
-            };
-        }
-    }, [newChartData]);
-
-    const currentUser = useRef(null);
-    // const [latestEarning, setLatestEarning] = useState(0);
-
-    // Get Today Earning
-    // useEffect(() => {
-    //     const fetchTodayEarning  = async() => {
-    //         const earning = await getTodayEarningByQuery('workspace-graph', 'createdAt', '<=', "desc");
-    //         setLatestEarning(earning);
-    //     };
-
-    //     fetchTodayEarning();
-    // }, []);
-
-    // Get payment info based on user month selection
-    const [selectedMonth, setSelectedMonth] = useState("March");
-    const [payments, setPayments] = useState([]);
-    const [highestExpense, setHighestExpense] = useState(0);
-    
-    // Get list of every month by selecting dropdown menu
-    useEffect(() => {
-        const fetchData = async () => {
-          const schedulerCol = collection(db, 'scheduler');
-          const schedulerQuery = query(schedulerCol);
-          const schedulerSnapshot = await getDocs(schedulerQuery);
-          const docs = [];
-      
-          for (const schedulerDoc of schedulerSnapshot.docs) {
-            const paymentsQuery = query(
-              collection(schedulerDoc.ref, 'payments'),
-              where('lastPaid', '>=', new Date(`${selectedMonth} 1, 2023`)),
-              where('lastPaid', '<=', new Date(`${selectedMonth} 31, 2023`)),
-            );
-            const paymentsSnapshot = await getDocs(paymentsQuery);
-      
-            if (!paymentsSnapshot.empty) {
-              const paymentDocs = paymentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-              docs.push({ id: schedulerDoc.id, ...schedulerDoc.data(), payments: paymentDocs });
-            }
-          }
-      
-          setPayments(docs);
-        };
-      
-        if (selectedMonth) {
-          fetchData();
-        }
-    }, [selectedMonth]);
-
-    // Get highest expenses on current month
-    useEffect(() => {
-        const fetchData = async () => {
-          const schedulerCol = collection(db, 'scheduler');
-          const schedulerQuery = query(schedulerCol);
-          const schedulerSnapshot = await getDocs(schedulerQuery);
-          let highestPaid = 0;
-      
-          for (const schedulerDoc of schedulerSnapshot.docs) {
-            const paymentsQuery = query(
-              collection(schedulerDoc.ref, 'payments'),
-              where('lastPaid', '>=', new Date(new Date().getFullYear(), new Date().getMonth(), 1)),
-              where('lastPaid', '<=', new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)),
-            );
-            const paymentsSnapshot = await getDocs(paymentsQuery);
-      
-            if (!paymentsSnapshot.empty) {
-              paymentsSnapshot.forEach(doc => {
-                const amountPaid = doc.data().amountPaid;
-                if (amountPaid > highestPaid) {
-                  highestPaid = amountPaid;
-                }
-              });
-            }
-          }
-      
-          setHighestExpense(highestPaid);
-        };
-      
-        fetchData();
-      }, []);
-    
-
     // Get current user that logged in
+    const currentUser = useRef(null);
+
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(async (user) => {
             if (user) {
@@ -195,16 +40,102 @@ const Dashboard = () => {
         return unsubscribe;
     })
 
-    // const [openModal, setOpenModal] = useState(false);
-    const [openExpenseModal, setOpenExpenseModal] = useState(false);
-    
-    // const handleOpenModal = () => {
-    //     setOpenModal(true);
-    // }
+    // Get list of every month by selecting dropdown menu
+    const [payments, setPayments] = useState([]);
+    const [selectedMonth, setSelectedMonth] = useState(getMonthName());
+    const [highestExpense, setHighestExpense] = useState(0);
+    const [isLoading, setIsLoading] = useState(true);
 
-    // const handleCloseModal = () => {
-    //     setOpenModal(false);
-    // }
+    useEffect(() => {
+        const fetchData = async () => {
+            setIsLoading(true);
+            const schedulerCol = collection(db, 'scheduler');
+            const schedulerQuery = query(schedulerCol);
+            const schedulerSnapshot = await getDocs(schedulerQuery);
+            const docs = [];
+            let highestPaid = 0;
+
+            const findHighestPaid = (highestPaid, doc) => {
+                const amountPaid = doc.data().amountPaid;
+                return amountPaid > highestPaid ? amountPaid : highestPaid;
+            };
+        
+            for (const schedulerDoc of schedulerSnapshot.docs) {
+                const paymentsQuery = query(
+                    collection(schedulerDoc.ref, 'payments'),
+                    where('lastPaid', '>=', new Date(`${selectedMonth} 1, 2023`)),
+                    where('lastPaid', '<=', new Date(`${selectedMonth} 31, 2023`)),
+                    orderBy('lastPaid', 'asc')
+                );
+                const paymentsSnapshot = await getDocs(paymentsQuery);
+            
+                if (!paymentsSnapshot.empty) {
+                    const paymentDocs = paymentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    docs.push({ id: schedulerDoc.id, ...schedulerDoc.data(), payments: paymentDocs });
+                    highestPaid = paymentsSnapshot.docs.reduce(findHighestPaid, highestPaid);
+
+                }
+            }
+        
+            setPayments(docs);
+            setIsLoading(false);
+            setHighestExpense(highestPaid);
+        };
+        
+        if (selectedMonth) {
+            fetchData();
+        }
+    }, [selectedMonth]);
+
+    // render chart when component is mounted
+    const chartRef = useRef(null);
+
+    useEffect(() => {
+        if (payments.length) {
+            const myChart = new Chart(chartRef.current, {
+                type: 'bar',
+                data: {
+                    labels: payments.map((ordered) => ordered.title),
+                    datasets: [
+                        {
+                            label: getMonthName() + " Financial Chart",
+                            data: payments.map((item) => item.payments[0].amountPaid),
+                            fill: true,
+                            backgroundColor: 'rgba(217, 0, 0, 0.06)',
+                            borderColor: 'rgba(224, 0, 0, 0.8)',
+                            borderWidth: 2,
+                            pointRadius: 6,
+                            tension: 0.4
+                        },
+                    ],
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 100000
+                            }
+                        },
+                        
+                        x: {
+                            grid: {
+                                display : false
+                            }
+                            
+                        }
+                    },
+                },
+            });
+
+            return () => {
+                myChart.destroy();
+            };
+        }
+    }, [payments]);
+
+    // Modal handling
+    const [openExpenseModal, setOpenExpenseModal] = useState(false);
 
     const handleOpenExpenseModal = () => {
         setOpenExpenseModal(true);
@@ -213,17 +144,6 @@ const Dashboard = () => {
     const handleCloseExpenseModal = () => {
         setOpenExpenseModal(false);
     }
-    
-    // const [cashflowData, setCashflowData] = useState([]);
-
-    // useEffect(() => {
-    //     const fetchCashflowData = async () => {
-    //         const cashflowData = await GetAllCashflowData();
-    //         setCashflowData(cashflowData);
-    //     }
-
-    //     fetchCashflowData();
-    // }, [])    
 
     return (
         <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '100vh'}}>
@@ -232,17 +152,12 @@ const Dashboard = () => {
 
                 <Box display={"flex"} alignItems={"center"} justifyContent="space-around" marginTop={"30px"}>
                     <Box flexGrow={1}>
-                        <Typography variant="h6" fontWeight={400}>{getMonthName() + ' highest expenses:'}</Typography>
+                        <Typography variant="h6" fontSize={"18px"} fontWeight={400}>{ selectedMonth + ' highest expenses:'}</Typography>
                         <Typography variant="h3" fontWeight={600} fontStyle={"normal"} color={"#1E8CF1"}>{FormatPrice(highestExpense)}</Typography>
                     </Box>
 
-
-                    <Button startIcon={<AddIcon />} onClick={handleOpenExpenseModal} variant="contained" color="error" sx={{borderRadius: '7px'}}>Add Expense</Button>
-
-                    {/* <Button startIcon={<AddIcon />} onClick={handleOpenModal} variant="contained" color="primary" sx={{borderRadius: '7px'}}>Add Income</Button> */}
-
-                    {/* {openModal && <ModalAddIncome open={openModal} handleClose={handleCloseModal} onCloseClick={handleCloseModal} getLatestEarning={latestEarning} />} */}
-                    {/* {openExpenseModal && <ModalAddExpense open={openExpenseModal} handleClose={handleCloseExpenseModal} onCloseClick={handleCloseExpenseModal} getLatestEarning={latestEarning} />} */}
+                    <Button startIcon={<AddIcon />} onClick={handleOpenExpenseModal} variant="contained" color="error" sx={{borderRadius: '7px'}}>Pay Bill</Button>
+                    {openExpenseModal && <ModalAddExpense open={openExpenseModal} handleClose={handleCloseExpenseModal} onCloseClick={handleCloseExpenseModal} />}
                 </Box>
                 
                 <div style={{width: "100%", marginTop: "30px", marginLeft: 'auto', marginRight: 'auto'}}>
@@ -254,7 +169,7 @@ const Dashboard = () => {
                     <Box display={"flex"} justifyContent={"space-between"}>
                         <Typography variant="h4" sx={{marginBottom: '20px'}}>Cashflow History</Typography>
 
-                        <Select size="small" sx={{padding: '0 20px', marginBottom: '20px'}} value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)}>
+                        <Select size="small" sx={{ textAlign: 'left', marginBottom: '20px'}} value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)}>
                             <MenuItem value="January">January</MenuItem>
                             <MenuItem value="February">February</MenuItem>
                             <MenuItem value="March">March</MenuItem>
@@ -271,7 +186,10 @@ const Dashboard = () => {
                     </Box>
 
                     <TableContainer sx={{borderRadius: '10px', backgroundColor: 'rgb(250,250,250)', marginBottom: '30px'}}>
-                        <Table>
+                        {isLoading ? (
+                            <CircularProgress sx={{padding: '20px'}} />
+                        ) : (
+                            <Table>
                             <TableHead>
                                 <TableRow>
                                     <TableCell sx={{fontWeight: 600, fontSize: 15}}>Title</TableCell>
@@ -286,12 +204,13 @@ const Dashboard = () => {
                                     <TableRow key={scheduler.id}>
                                         <TableCell>{scheduler.title}</TableCell>
                                         <TableCell>{scheduler.payments && scheduler.payments[0]?.lastPaid?.toDate().toLocaleDateString()}</TableCell>
-                                        <TableCell>{scheduler.payments && scheduler.payments[0]?.amountPaid.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}</TableCell>
-                                        <TableCell>{scheduler.payments && scheduler.payments[0]?.remainingBill.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}</TableCell>
+                                        <TableCell>{scheduler.payments && scheduler.payments[0]?.amountPaid?.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}</TableCell>
+                                        <TableCell>{scheduler.payments && scheduler.payments[0]?.remainingBill?.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}</TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>
                         </Table>
+                        )}
                     </TableContainer>
                 </div>
             </Container>
