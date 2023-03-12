@@ -1,10 +1,12 @@
-import { Button, FormControl, InputLabel, MenuItem, Modal, Select, TextField, Typography } from "@mui/material";
+import { Button, FormControl, FormControlLabel, FormGroup, InputLabel, MenuItem, Modal, Select, Switch, TextField, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { addDoc, collection, Timestamp } from "firebase/firestore";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { db } from "../../config/firebase";
 import css from "../styles/global-style.css";
 import SnackbarComponent from "../snackbar";
+import { GetMemberOnCurrentToken } from "../utils/firestoreUtils";
+import InputAdornment from '@mui/material/InputAdornment';
 
 const style = {
     position: 'absolute',
@@ -22,11 +24,39 @@ const ModalAddScheduler = ({open, handleClose, onCloseClick}) => {
 
     const [schedulerTitle, setSchedulerTitle] = useState('');
     const [schedulerType, setSchedulerType] = useState('');
-    const [schedulerDesc, setSchedulerDesc] = useState('');
-    const schedulerRef = collection(db, "scheduler");
+    const [schedulerAssignee, setSchedulerAssignee] = useState("");
+    const [schedulerDeadline, setSchedulerDeadline] = useState("");
+    const [memberList, setMemberList] = useState([]);
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
     const [snackbarSeverity, setSnackbarSeverity] = useState('success');
+
+    // Handle switch button
+    const [isBillFixed, setIsBillFixed] = useState(false);
+    const [isInstallment, setIsInstallment] = useState(false);
+
+    const handleBillFixedToggle = (event) => {
+        setIsBillFixed(event.target.checked);
+    };
+
+    const handleInstallmentToggle = (event) => {
+        setIsInstallment(event.target.checked);
+    };
+    
+
+    const [billFixedAmount, setBillFIxedAmount] = useState(0);
+    const [installmentTotalPayment, setInstallmentTotalPayment] = useState(0);
+
+
+    // Fetch member list
+    useEffect(() => {
+        const fetchMemberListData = async () => {
+            const memberListData = await GetMemberOnCurrentToken('n4th4nSpace');
+            setMemberList(memberListData);
+        }
+
+        fetchMemberListData();
+    }, [])
 
     const HandleSave = async() => {
         // not allowing empty title neither type
@@ -36,12 +66,30 @@ const ModalAddScheduler = ({open, handleClose, onCloseClick}) => {
             alert('Scheduler type is mandatory!');
         } else {
             try {
-                await addDoc(schedulerRef, {
+                const newSchedulerData = {
                     createdAt: Timestamp.fromDate(new Date()),
                     title: schedulerTitle,
-                    desc: schedulerDesc,
-                    type: schedulerType
-                });
+                    assignee: schedulerAssignee,
+                    deadline: schedulerDeadline + ' of the month',
+                    type: schedulerType,
+                }
+
+                if (isBillFixed) {
+                    newSchedulerData.fixedBill = Number(billFixedAmount);
+                }
+
+                if (isInstallment) {
+                    newSchedulerData.isCicilan = true;  
+                }
+
+                // Add newSchedulerData to the schedulerRef
+                const schedulerRef = collection(db, "scheduler");
+                const newSchedulerDoc = await addDoc(schedulerRef, newSchedulerData);
+
+                /// Create a new document in the payments subcollection
+                const paymentsRef = collection(newSchedulerDoc, "payments");
+                const paymentData = { remainingBill: Number(installmentTotalPayment) };
+                await addDoc(paymentsRef, paymentData);
 
                 // confirm if data successfully saved
                 setSnackbarMessage('New scheduler has been added!');
@@ -89,17 +137,34 @@ const ModalAddScheduler = ({open, handleClose, onCloseClick}) => {
                         }}
                     />
 
+                    <FormControl sx={{marginTop: '5px'}} fullWidth>
+                        <InputLabel id="select-schedule-assignee-label">Assignee</InputLabel>
+                        <Select
+                            labelId="select-schedule-assignee-label"
+                            id="select-schedule-type"
+                            label="Assignee"
+                            displayEmpty
+                            value={schedulerAssignee}
+                            onChange={(e) => setSchedulerAssignee(e.target.value)}
+                        >
+                            {memberList.map((member) => (
+                                <MenuItem value={member.name}>{member.name}</MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+
                     <TextField
+                        label="Payment Deadline"
                         id="outlined-multiline-static"
-                        onChange={(e) => setSchedulerDesc(e.target.value)}
-                        label="Description"
-                        type="text"
-                        multiline
-                        rows={4}
+                        sx={{ marginTop: '25px', marginBottom: '15px'}}
+                        type="number"
                         size="small"
-                        fullWidth
-                        placeholder="Add some details for your new scheduler"
-                        inputProps={{style: {fontSize: 15}}}
+                        onChange={(e) => setSchedulerDeadline(e.target.value)}
+                        placeholder="Name of this scheduler"
+                        InputProps={{
+                            style: {fontSize: 15},
+                            endAdornment: <InputAdornment position="start" >Of the month</InputAdornment>
+                        }}
                     />
 
                     <FormControl sx={{marginTop: '15px'}} fullWidth>
@@ -115,6 +180,48 @@ const ModalAddScheduler = ({open, handleClose, onCloseClick}) => {
                             <MenuItem value="Tagihan tahunan">Annual</MenuItem>
                         </Select>
                     </FormControl>
+
+                    <FormGroup sx={{marginTop: '10px'}}>
+                        <FormControlLabel control={<Switch checked={isBillFixed} onChange={handleBillFixedToggle} />} label="Bill is fixed" />
+
+                        {isBillFixed && (
+                            <TextField
+                                label="Bill Amount"
+                                id="outlined-multiline-static"
+                                sx={{marginTop: '5px', marginBottom: '5px'}}
+                                fullWidth
+                                type="number"
+                                size="small"
+                                onChange={(e) => setBillFIxedAmount(e.target.value)}
+                                placeholder="Enter amount of bill"
+                                InputProps={{
+                                    style: {fontSize: 15}
+                                }}
+                            />
+                        )}
+                    </FormGroup>
+                    
+                    <FormGroup sx={{marginTop: '10px'}}>
+                        <FormControlLabel control={<Switch checked={isInstallment} onChange={handleInstallmentToggle} />} label="This is installment" />
+
+                        {isInstallment && (
+                            <TextField
+                                label="Enter total payment"
+                                id="outlined-multiline-static"
+                                sx={{ marginTop: '5px', marginBottom: '15px'}}
+                                fullWidth
+                                type="number"
+                                size="small"
+                                onChange={(e) => setInstallmentTotalPayment(e.target.value)}
+                                placeholder="Enter total payment"
+                                InputProps={{
+                                    style: {fontSize: 15}
+                                }}
+                            />
+                        )}
+                    </FormGroup>
+
+                    
 
                     <Box className="box-income-modal" sx={css}>
                         <Button onClick={HandleSave} className="btn-group-income-modal" sx={css} color="primary" variant="contained">Create</Button>

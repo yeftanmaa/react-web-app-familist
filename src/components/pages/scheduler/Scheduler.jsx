@@ -15,17 +15,6 @@ import { collection, getDocs, limit, orderBy, query } from "firebase/firestore";
 
 const Scheduler = () => {
 
-    // const [schedulerData, setSchedulerData] = useState([]);
-
-    // useEffect(() => {
-    //     const fetchSchedulerData = async () => {
-    //         const schedulerData = await getAllSchedulerData();
-    //         setSchedulerData(schedulerData);
-    //     }
-
-    //     fetchSchedulerData();
-    // }, [])
-
     const [data, setData] = useState([]);
 
     useEffect(() => {
