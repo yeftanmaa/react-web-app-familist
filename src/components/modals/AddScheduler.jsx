@@ -79,7 +79,9 @@ const ModalAddScheduler = ({open, handleClose, onCloseClick}) => {
                 }
 
                 if (isInstallment) {
-                    newSchedulerData.isCicilan = true;  
+                    newSchedulerData.isCicilan = true;
+                    newSchedulerData.totalBills = Number(installmentTotalPayment);
+
                 }
 
                 // Add newSchedulerData to the schedulerRef

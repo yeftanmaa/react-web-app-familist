@@ -132,20 +132,18 @@ const Profile = () => {
 
             </Container>
 
-            <Box component={Paper} display={"flex"} width="320px" justifyContent={"space-evenly"} alignItems={"center"} p={1} sx={{position: "absolute", bottom: '60px'}}>
-                    <Typography variant="h6" sx={{fontSize: '16px'}}>Family Members:</Typography>
-                    <AvatarGroup max={4}>
-                        {familyMembers.map((member) => (
-                            <Tooltip title={member.name}>
-                                <Avatar alt={member.name} style={{backgroundColor: randomColor()}}>{member.name[0]}</Avatar>
-                            </Tooltip>
-                            
-                        ))}
-                    </AvatarGroup>
+            <Box component={Paper} display={"flex"} width="320px" justifyContent={"space-evenly"} alignItems={"center"} p={1} sx={{position: "absolute", bottom: '20px', margin: '0 100px'}}>
+                <Typography variant="h6" sx={{fontSize: '16px'}}>Family Members:</Typography>
+                <AvatarGroup max={4}>
+                    {familyMembers.map((member) => (
+                        <Tooltip title={member.name}>
+                            <Avatar alt={member.name} style={{backgroundColor: randomColor()}}>{member.name[0]}</Avatar>
+                        </Tooltip>
+                        
+                    ))}
+                </AvatarGroup>
                     
             </Box>
-
-            <p style={{opacity: 0.3, position: 'fixed', bottom: '1%'}}>Copyright 2023. Thesis Project Purposes.</p>
         </div>
     );
 }

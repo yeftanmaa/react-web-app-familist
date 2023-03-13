@@ -162,17 +162,17 @@ const Scheduler = () => {
                     <Table sx={{minWidth: 650}}>
                         <TableHead>
                             <TableRow>
-                                <TableCell onClick={() => handleSort('title')} sx={{fontWeight: 600, fontSize: 15, cursor: 'pointer'}}>
+                                <TableCell onClick={() => handleSort('title')} sx={{fontWeight: 600, fontSize: 18, cursor: 'pointer'}}>
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px'}}>
                                         Title {sortIcon('title')}
                                     </Box>
                                 </TableCell>
-                                <TableCell onClick={() => handleSort('deadline')} sx={{fontWeight: 600, fontSize: 15,  cursor: 'pointer', display: 'flex', gap: '10px'}}>
+                                <TableCell onClick={() => handleSort('deadline')} sx={{fontWeight: 600, fontSize: 18,  cursor: 'pointer', display: 'flex', gap: '10px'}}>
                                     Deadline {sortIcon('deadline')}
                                 </TableCell>
-                                <TableCell sx={{fontWeight: 600, fontSize: 15}}>Last Paid</TableCell>
-                                <TableCell sx={{fontWeight: 600, fontSize: 15}}>Next Payment</TableCell>
-                                <TableCell sx={{fontWeight: 600, fontSize: 15}} align="center">Action</TableCell>
+                                <TableCell sx={{fontWeight: 600, fontSize: 18}}>Last Paid</TableCell>
+                                <TableCell sx={{fontWeight: 600, fontSize: 18}}>Next Payment</TableCell>
+                                <TableCell sx={{fontWeight: 600, fontSize: 18}} align="center">Action</TableCell>
                             </TableRow>
                         </TableHead>
 

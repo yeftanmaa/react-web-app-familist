@@ -93,7 +93,7 @@ const Dashboard = () => {
     useEffect(() => {
         if (payments.length) {
             const myChart = new Chart(chartRef.current, {
-                type: 'bar',
+                type: 'line',
                 data: {
                     labels: payments.map((ordered) => ordered.title),
                     datasets: [
@@ -104,8 +104,7 @@ const Dashboard = () => {
                             backgroundColor: 'rgba(217, 0, 0, 0.06)',
                             borderColor: 'rgba(224, 0, 0, 0.8)',
                             borderWidth: 2,
-                            pointRadius: 6,
-                            tension: 0.4
+                            pointRadius: 6
                         },
                     ],
                 },
@@ -114,7 +113,7 @@ const Dashboard = () => {
                         y: {
                             beginAtZero: true,
                             ticks: {
-                                stepSize: 100000
+                                stepSize: 200000
                             }
                         },
                         
@@ -146,11 +145,11 @@ const Dashboard = () => {
     }
 
     return (
-        <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '100vh'}}>
+        <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', marginTop: '15px'}}>
             
             <Container maxWidth="lg">
 
-                <Box display={"flex"} alignItems={"center"} justifyContent="space-around" marginTop={"30px"}>
+                <Box display={"flex"} alignItems={"center"} justifyContent="space-around">
                     <Select size="small" sx={{ textAlign: 'left', marginBottom: '20px'}} value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)}>
                         <MenuItem value="January">January</MenuItem>
                         <MenuItem value="February">February</MenuItem>

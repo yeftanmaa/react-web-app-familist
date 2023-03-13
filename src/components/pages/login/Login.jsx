@@ -39,7 +39,7 @@ const Login = () => {
                 password
               );
               if (userCredential.user) {
-                navigate("/dashboard");
+                navigate("/scheduler");
               }
         } catch (err) {
             setSnackbarMessage('Error! Please enter correct email and password!');
@@ -68,7 +68,7 @@ const Login = () => {
                 })
             };
 
-            navigate("/dashboard");
+            navigate("/scheduler");
         } catch (err) {
             setSnackbarMessage('Error! Could not logged in with Google');
             setSnackbarSeverity('error');

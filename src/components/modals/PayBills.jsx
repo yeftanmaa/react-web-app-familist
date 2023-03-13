@@ -1,10 +1,11 @@
-import { Button, InputAdornment, Modal, TextField, Typography } from "@mui/material";
+import { Button, InputAdornment, Modal, TextField, Typography, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 import { Box } from "@mui/system";
-import { addDoc, collection, Timestamp } from "firebase/firestore";
-import React, { useState } from "react";
+import { addDoc, collection } from "firebase/firestore";
+import React, { useState, useEffect } from "react";
 import { db } from "../../config/firebase";
 import css from "../styles/global-style.css";
 import SnackbarComponent from "../snackbar";
+import { FetchAllSchedulers } from "../../hooks/useFetchScheduler";
 
 const style = {
     position: 'absolute',
@@ -19,13 +20,51 @@ const style = {
 };
 
 const ModalPayBills = ({open, handleClose, onCloseClick, getLatestEarning}) => {
-    const [expenseTitle, setExpenseTitle] = useState("");
-    const [expenseDesc, setExpenseDesc] = useState("");
+    const [schedulerList, setSchedulerList] = useState([]);
+    const [selectBill, setSelectBill] = useState('');
     const [expense, setExpense] = useState(0);
-    const workspaceRef = collection(db, "workspace-graph");
+    const [selectedSchedulerAmount] = useState(0); // new state variable
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
     const [snackbarSeverity, setSnackbarSeverity] = useState('success');
+
+    // Fetch list of scheduler
+    useEffect(() => {
+      const fetchSchedulerData = async () => {
+        const schedulerData = await FetchAllSchedulers();
+
+        setSchedulerList(schedulerData);
+      }
+
+      fetchSchedulerData();
+    
+    }, []);
+
+    const [schedulerId, setSchedulerId] = useState('');
+    const [selectedScheduler, setSelectedScheduler] = useState([]);
+
+    // Update expense when a new scheduler is selected
+    useEffect(() => {
+        // Find the selected scheduler based on its title
+        const selectedScheduler = schedulerList.find(schedule => schedule.title === selectBill);
+      
+        // Update the expense state with the selected scheduler's amount
+        if (selectedScheduler) {
+            if (selectedScheduler.fixedBill === undefined) {
+                setExpense(0);
+
+            } else {
+                setExpense(selectedScheduler.fixedBill);
+            }
+            setSchedulerId(selectedScheduler.id);
+            setSelectedScheduler(selectedScheduler);
+        } else {
+          setExpense(0);
+          setSchedulerId('');
+        }
+    }, [selectBill, schedulerList]);
+
+    console.log(schedulerId);
 
     const HandleSave = async() => {
         // not allowing empty earning input
@@ -45,15 +84,19 @@ const ModalPayBills = ({open, handleClose, onCloseClick, getLatestEarning}) => {
             }, 3000);
         } else {
             try {
-                await addDoc(workspaceRef, {
-                    createdAt: Timestamp.fromDate(new Date()),
-                    title: expenseTitle,
-                    description: expenseDesc,
-                    amount: Number(expense),
-                    type: 'Expense',
-                    totalEarnings: Number(getLatestEarning) - Number(expense),
-                    token: "n4th4nSpace"
-                });
+                const schedulerRef = collection(db, 'scheduler', schedulerId, 'payments');
+
+                const newPayment = {
+                    amountPaid: Number(expense),
+                    lastPaid: new Date()
+                };
+
+                // If it is a cicilan then set remainingBill
+                if (selectedScheduler.isCicilan === undefined) {
+                    newPayment.remainingBill = Number(selectedScheduler.totalBills) - Number(expense);
+                }
+
+                await addDoc(schedulerRef, newPayment);
 
                 // confirm if data successfully saved
                 setSnackbarMessage('Expense has been added to your workspace!');
@@ -85,34 +128,24 @@ const ModalPayBills = ({open, handleClose, onCloseClick, getLatestEarning}) => {
                 onClose={handleClose}
             >
                 <Box sx={style}>
-                    <Typography variant="h4" sx={{textAlign: 'center', fontWeight: 'medium'}}>New Expense</Typography>
+                    <Typography variant="h4" sx={{textAlign: 'center', fontWeight: 'medium'}}>Bill Payment</Typography>
 
                     {/* Title field */}
-                    <TextField
-                        id="outlined-multiline-static"
-                        onChange={(e) => setExpenseTitle(e.target.value)}
-                        label="Title"
-                        type="text"
-                        size="small"
-                        fullWidth
-                        placeholder="Set new title"
-                        inputProps={{style: {fontSize: 15}}}
-                        sx={{ marginTop: '25px', marginBottom: '20px'}}
-                    />
-
-                    {/* Description Field */}
-                    <TextField
-                        id="outlined-multiline-static"
-                        onChange={(e) => setExpenseDesc(e.target.value)}
-                        label="Description"
-                        type="text"
-                        multiline
-                        rows={4}
-                        size="small"
-                        fullWidth
-                        placeholder="Add some details for your new expense"
-                        inputProps={{style: {fontSize: 15}}}
-                    />
+                    <FormControl sx={{marginTop: '25px'}} fullWidth>
+                        <InputLabel id="select-scheduler-label">Which bill to pay?</InputLabel>
+                        <Select
+                            labelId="select-scheduler-label"
+                            id="select-scheduler-type"
+                            label="Which bill to pay?"
+                            displayEmpty
+                            value={selectBill}
+                            onChange={(e) => setSelectBill(e.target.value)}
+                        >
+                            {schedulerList.map((schedule) => (
+                                <MenuItem value={schedule.title}>{schedule.title}</MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
 
                     {/* Amount Field */}
                     <TextField
@@ -120,16 +153,16 @@ const ModalPayBills = ({open, handleClose, onCloseClick, getLatestEarning}) => {
                         id="outlined-start-adornment"
                         sx={{ marginTop: '25px'}}
                         fullWidth
+                        value={selectedSchedulerAmount || expense}
                         type="number"
                         onChange={(e) => setExpense(e.target.value)}
                         size="large"
-                        placeholder="Set your new income"
+                        placeholder="Set amount to pay"
                         InputProps={{
                             startAdornment: <InputAdornment position="start">IDR</InputAdornment>,
                             style: {fontSize: 15}
                         }}
                     />
-
                     <Box className="box-income-modal" sx={css}>
                         <Button onClick={HandleSave} className="btn-group-income-modal" sx={css} color="primary" variant="contained">Save</Button>
                         <Button onClick={onCloseClick} className="btn-group-income-modal" sx={css} color="cancel" variant="outlined">Cancel</Button>

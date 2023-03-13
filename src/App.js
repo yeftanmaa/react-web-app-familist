@@ -36,14 +36,7 @@ const theme = createTheme({
           fontSize: '16px'
         },
       },
-    },
-    MuiTableCell: {
-        styleOverrides: {
-          root: {
-            borderBottom: "none"
-          },
-        },
-    },
+    }
   },
   palette: {
     primary: {
