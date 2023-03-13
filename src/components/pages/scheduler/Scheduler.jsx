@@ -158,7 +158,7 @@ const Scheduler = () => {
                 </Box>
 
                 {/* Table below */}
-                <TableContainer sx={{marginTop: '30px'}}>
+                <TableContainer sx={{marginTop: '60px'}}>
                     <Table sx={{minWidth: 650}}>
                         <TableHead>
                             <TableRow>
@@ -182,10 +182,10 @@ const Scheduler = () => {
                                 : sortedData
                             ).map((item) => (
                                 <TableRow key={item.id}>
-                                    <TableCell><Link component="button" sx={{fontWeight: 500, fontSize: 15, textDecoration: 'none', color: '#0047FF'}} onClick={() => {handleOpenDetailModal(item.title, item.type, item.payment.lastPaid.toDate().toLocaleString(), item.fixedBill === undefined ? item.payment.amountPaid : item.fixedBill, item.isCicilan === true ? item.payment.remainingBill : 0, item.isCicilan === true ? item.totalBills : 0)}}>{item.title}</Link></TableCell>
-                                    <TableCell>{item.deadline}</TableCell>
-                                    <TableCell>{item.payment.lastPaid.toDate().toLocaleString()}</TableCell>
-                                    <TableCell>{item.deadline.substring(0, 2) + "/" + nextMonthWithYear}</TableCell>
+                                    <TableCell><Link component="button" sx={{fontWeight: 500, fontSize: 17, textDecoration: 'none', color: '#0047FF'}} onClick={() => {handleOpenDetailModal(item.title, item.type, item.payment.lastPaid.toDate().toLocaleString(), item.fixedBill === undefined ? item.payment.amountPaid : item.fixedBill, item.isCicilan === true ? item.payment.remainingBill : 0, item.isCicilan === true ? item.totalBills : 0)}}>{item.title}</Link></TableCell>
+                                    <TableCell sx={{fontSize: 17}}>{item.deadline}</TableCell>
+                                    <TableCell sx={{fontSize: 17}}>{item.payment.lastPaid.toDate().toLocaleString()}</TableCell>
+                                    <TableCell sx={{fontSize: 17}}>{item.deadline.substring(0, 2) + "/" + nextMonthWithYear}</TableCell>
                                     <TableCell align="center">
                                         <IconButton onClick={() => handleOpenEditModal(item.desc, item.title, item.type, item.id)} size="large">
                                             <EditIcon color="primary" />

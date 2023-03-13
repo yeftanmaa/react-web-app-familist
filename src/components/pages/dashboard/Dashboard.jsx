@@ -42,6 +42,8 @@ const Dashboard = () => {
 
     // Get list of every month by selecting dropdown menu
     const [payments, setPayments] = useState([]);
+    const [prevPayments, setPrevPayments] = useState([]);
+    var previousMonth = useRef('');
     const [selectedMonth, setSelectedMonth] = useState(getMonthName());
     const [highestExpense, setHighestExpense] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
@@ -87,6 +89,63 @@ const Dashboard = () => {
         }
     }, [selectedMonth]);
 
+    useEffect(() => {
+        const fetchPrevData = async () => {
+            setIsLoading(true);
+            const schedulerCol = collection(db, 'scheduler');
+            const schedulerQuery = query(schedulerCol);
+            const schedulerSnapshot = await getDocs(schedulerQuery);
+            const docs = [];
+
+            if (selectedMonth === 'January') {
+                previousMonth.current = 'December';
+            } else if (selectedMonth === 'February') {
+                previousMonth.current = 'January';
+            } else if (selectedMonth === 'March') {
+                previousMonth.current = 'February';
+            } else if (selectedMonth === 'April') {
+                previousMonth.current = 'March';
+            } else if (selectedMonth === 'May') {
+                previousMonth.current = 'April';
+            } else if (selectedMonth === 'June') {
+                previousMonth.current = 'May';
+            } else if (selectedMonth === 'July') {
+                previousMonth.current = 'June';
+            } else if (selectedMonth === 'August') {
+                previousMonth.current = 'July';
+            } else if (selectedMonth === 'September') {
+                previousMonth.current = 'August';
+            } else if (selectedMonth === 'October') {
+                previousMonth.current = 'September';
+            } else if (selectedMonth === 'November') {
+                previousMonth.current = 'October';
+            } else if (selectedMonth === 'December') {
+                previousMonth.current = 'November';
+            }
+            
+            for (const schedulerDoc of schedulerSnapshot.docs) {
+
+                const PrevPaymentsQuery = query(
+                    collection(schedulerDoc.ref, 'payments'),
+                    where('lastPaid', '>=', new Date(`${previousMonth.current} 1, 2023`)),
+                    where('lastPaid', '<=', new Date(`${previousMonth.current} 31, 2023`)),
+                    orderBy('lastPaid', 'asc')
+                );
+                const paymentsSnapshot = await getDocs(PrevPaymentsQuery);
+            
+                if (!paymentsSnapshot.empty) {
+                    const paymentDocs = paymentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    docs.push({ id: schedulerDoc.id, ...schedulerDoc.data(), payments: paymentDocs });
+
+                }
+            }
+        
+            setPrevPayments(docs);
+        };
+
+        fetchPrevData();
+    }, [selectedMonth])
+
     // render chart when component is mounted
     const chartRef = useRef(null);
 
@@ -103,6 +162,16 @@ const Dashboard = () => {
                             fill: true,
                             backgroundColor: 'rgba(217, 0, 0, 0.06)',
                             borderColor: 'rgba(224, 0, 0, 0.8)',
+                            borderWidth: 2,
+                            pointRadius: 6
+                        },
+                        
+                        {
+                            label: previousMonth.current + " Financial Chart",
+                            data: prevPayments.map((item) => item.payments[0].amountPaid),
+                            fill: true,
+                            backgroundColor: 'rgba(0, 83, 249, 0.5)',
+                            borderColor: 'rgba(0, 83, 249, 0.8)',
                             borderWidth: 2,
                             pointRadius: 6
                         },
@@ -131,7 +200,7 @@ const Dashboard = () => {
                 myChart.destroy();
             };
         }
-    }, [payments, selectedMonth]);
+    }, [payments, selectedMonth, prevPayments]);
 
     // Modal handling
     const [openExpenseModal, setOpenExpenseModal] = useState(false);
@@ -174,7 +243,7 @@ const Dashboard = () => {
                     {openExpenseModal && <ModalPayBills open={openExpenseModal} handleClose={handleCloseExpenseModal} onCloseClick={handleCloseExpenseModal} />}
                 </Box>
                 
-                <div style={{width: "100%", marginTop: "30px", marginLeft: 'auto', marginRight: 'auto'}}>
+                <div style={{width: "70%", marginTop: "50px", marginLeft: 'auto', marginRight: 'auto'}}>
                     <canvas ref={chartRef} />
                 </div>
 
