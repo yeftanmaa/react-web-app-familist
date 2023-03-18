@@ -106,16 +106,20 @@ const Login = () => {
     return (
         <div>
             <div className="navbar" style={css}>
-                 <img src="/logo-only.png" alt="familist" width={45} style={{border: "1px solid white"}} />
-
-                 <Box style={{display: "flex", alignItems: "center"}}>
+                <div className="box-img" >
+                 <img style={{backgroundColor: 'white', padding: '7px', borderRadius: '8px'}} src="/logo-only.png" alt="familist" width={45} />
+                 <Typography variant="h6" sx={{color: "white"}}>Monthly Expenses System For Family</Typography>
+                </div>
+                 
+                 <Box style={{display: "flex", alignItems: "center", color: "white"}}>
                     <Typography>New to Familist?</Typography>
-                    <Button sx={{color: "black",border: "1px solid rgba(0, 0, 0, 0.21)", padding: "5px 20px", marginLeft: "10px"}} href="/register">Create an account</Button>
+                    <Button sx={{color: "white", border: "1px solid white", padding: "5px 20px", marginLeft: "10px"}} href="/register">Create an account</Button>
                  </Box>
             </div>
 
             <Container>
                 <div className="regis-box" style={css}>
+                    
                     <Typography variant="h4" fontWeight={500} sx={{marginBottom: '10px'}}>Sign In</Typography>
 
                     {/* Email Input */}

@@ -170,7 +170,7 @@ const Dashboard = () => {
                             label: previousMonth.current + " Financial Chart",
                             data: prevPayments.map((item) => item.payments[0].amountPaid),
                             fill: true,
-                            backgroundColor: 'rgba(0, 83, 249, 0.5)',
+                            backgroundColor: 'rgba(0, 83, 249, 0.05)',
                             borderColor: 'rgba(0, 83, 249, 0.8)',
                             borderWidth: 2,
                             pointRadius: 6
@@ -214,7 +214,7 @@ const Dashboard = () => {
     }
 
     return (
-        <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', marginTop: '15px'}}>
+        <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', marginTop: '45px'}}>
             
             <Container maxWidth="lg">
 
@@ -235,15 +235,16 @@ const Dashboard = () => {
                     </Select>
 
                     <Box flexGrow={1} textAlign="center">
-                        <Typography variant="h6" fontSize={"18px"} fontWeight={400}>{ selectedMonth + ' highest expenses:'}</Typography>
-                        <Typography variant="h3" fontWeight={600} fontStyle={"normal"} color={"#1E8CF1"}>{FormatPrice(highestExpense)}</Typography>
+                        {/* <Typography variant="h6" fontSize={"18px"} fontWeight={400}>{ selectedMonth + ' highest expenses:'}</Typography> */}
+                        {/* <Typography variant="h3" fontWeight={600} fontStyle={"normal"} color={"#1E8CF1"}>{FormatPrice(highestExpense)}</Typography> */}
+                        <Typography variant="h4" fontWeight={600} fontStyle={"normal"} color={"#1E8CF1"}>Family Monthly Expenses System</Typography>
                     </Box>
 
                     <Button startIcon={<AddIcon />} onClick={handleOpenExpenseModal} variant="contained" color="error" sx={{borderRadius: '7px'}}>Pay Bill</Button>
                     {openExpenseModal && <ModalPayBills open={openExpenseModal} handleClose={handleCloseExpenseModal} onCloseClick={handleCloseExpenseModal} />}
                 </Box>
                 
-                <div style={{width: "70%", marginTop: "50px", marginLeft: 'auto', marginRight: 'auto'}}>
+                <div style={{width: "80%", marginTop: "50px", marginLeft: 'auto', marginRight: 'auto'}}>
                     <canvas ref={chartRef} />
                 </div>
 

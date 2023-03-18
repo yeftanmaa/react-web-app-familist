@@ -84,7 +84,7 @@ const Profile = () => {
     };
 
     return (
-        <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', textAlign: 'center', height: '600px'}}>
+        <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', textAlign: 'center', height: '500px'}}>
             <Container>
                 <Typography variant="h4" fontWeight={500} marginBottom={2}>Profile</Typography>
                 <Box sx={{ display: 'flex', alignItems: "center", marginTop: '20px', justifyContent: 'center'}}>
@@ -121,7 +121,7 @@ const Profile = () => {
 
                         <Grid gridColumn="span 2"></Grid>
                         <Grid gridColumn="span 10" justifyContent={"center"}>
-                            <Button onClick={handleOpenEditModal} startIcon={<EditIcon />} variant="outlined" sx={{ width: '30%', marginLeft: '10px', marginRight: '10px'}}>Edit Profile</Button>
+                            <Button onClick={handleOpenEditModal} startIcon={<EditIcon />} variant="outlined" sx={{ width: '40%', marginLeft: '10px', marginRight: '10px'}}>Edit Profile</Button>
                             <Button onClick={handleLogout} endIcon={<LogoutIcon />} color="cancel" variant="contained" href="/">Sign Out</Button>
                             {openEditModal && (
                                 <ModalEditProfile open={openEditModal} onclose={handleCloseEditModal} onCloseClick={handleCloseEditModal} name={userName} desc={userDesc} email={userEmail} phone={userPhone} />

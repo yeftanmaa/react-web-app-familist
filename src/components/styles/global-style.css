@@ -5,7 +5,14 @@
     top: 0;
     left: 0;
     right: 0;
-    background-color: white;
+    background-color: #4472ca;
+}
+
+.box-img {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 20px;
 }
 
 .regis-box {

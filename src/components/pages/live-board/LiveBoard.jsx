@@ -99,7 +99,7 @@ function App() {
           <Fab onClick={handleOpenAddModal} color="primary"> <AddIcon /> </Fab>
         </Box>
 
-        <Box sx={{display: "flex", justifyContent: 'space-between', alignItems: 'center'}}>
+        <Box sx={{display: "flex", justifyContent: 'space-between', alignItems: 'center', marginTop: '45px'}}>
           <Typography variant="h4" style={{ fontWeight: 500 }}>Kanban Board</Typography>
           
           <Box sx={{display: 'flex', alignItems: 'center', gap: '20px'}}>

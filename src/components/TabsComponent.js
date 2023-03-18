@@ -26,15 +26,24 @@ function TabsComponent() {
   return (
     <div>
         <div className="navbar" style={css}>
-            <a href="/"><img src="/logo_familist.png" alt="familist with text" width={120} style={{border: "1px solid white"}} /></a>
+            <a href="/"><img style={{backgroundColor: 'white', padding: '7px', borderRadius: '8px'}} src="/logo_familist.png" alt="familist with text" width={120} /></a>
 
-            <Box sx={{ width: '100%' }}>
+            <Box sx={{ width: '100%', color: 'white' }}>
                 <Box>
-                    <Tabs value={activeTab} centered>
-                        <Tab label="Dashboard" component={Link} to="/dashboard" sx={{ textTransform: 'capitalize', fontSize: '17px' }} />
-                        <Tab label="Live Board" component={Link} to="/live-board" sx={{ textTransform: 'capitalize', fontSize: '17px' }} />
-                        <Tab label="Scheduler" component={Link} to="/scheduler" sx={{ textTransform: 'capitalize', fontSize: '17px' }} />
-                        <Tab label="Profile" component={Link} to="/profile" sx={{ textTransform: 'capitalize', fontSize: '17px' }} />
+                    <Tabs
+                      value={activeTab}
+                      centered
+                      TabIndicatorProps={{
+                        style: {
+                          backgroundColor: "white",
+                          color: 'white'
+                        }
+                      }}
+                      >
+                        <Tab label="Dashboard"  component={Link} to="/dashboard" sx={{ textTransform: 'capitalize', fontSize: '17px', color: 'white' }} />
+                        <Tab label="Live Board" component={Link} to="/live-board" sx={{ textTransform: 'capitalize', fontSize: '17px', color: 'white' }} />
+                        <Tab label="Scheduler" component={Link} to="/scheduler" sx={{ textTransform: 'capitalize', fontSize: '17px', color: 'white' }} />
+                        <Tab label="Profile" component={Link} to="/profile" sx={{ textTransform: 'capitalize', fontSize: '17px', color: 'white' }} />
                     </Tabs>
                 </Box>                    
             </Box>
