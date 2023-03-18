@@ -1,154 +1,59 @@
-import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Select, MenuItem } from "@mui/material";
+import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Select, MenuItem, Skeleton } from "@mui/material";
 import { Box, Container } from "@mui/system";
-import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
 import React, { useEffect, useRef, useState } from "react";
-import { auth, db } from "../../../config/firebase";
 import { getMonthName } from "../../utils/DateGenerator";
-import { FormatPrice } from "../../utils/PriceToString";
 import Chart from 'chart.js/auto';
 import AddIcon from '@mui/icons-material/Add';
 import ModalPayBills from "../../modals/PayBills";
-import CircularProgress from '@mui/material/CircularProgress';
+import useFetchCashflowHistory from "../../../hooks/useFetchCashflowHistory";
+import useFetchPreviousMonthData from "../../../hooks/useFetchPreviousMonthData";
+import useGetUser from '../../../hooks/useGetUser';
+
+function setPreviousMonth(month) {
+    if (month === 'January') {
+        return 'December';
+    } else if (month === 'February') {
+        return 'January';
+    } else if (month === 'March') {
+        return 'February';
+    } else if (month === 'April') {
+        return 'March';
+    } else if (month === 'May') {
+        return 'April';
+    } else if (month === 'June') {
+        return 'May';
+    } else if (month === 'July') {
+        return 'June';
+    } else if (month === 'August') {
+        return 'July';
+    } else if (month === 'September') {
+        return 'August';
+    } else if (month === 'October') {
+        return 'September';
+    } else if (month === 'November') {
+        return 'October';
+    } else if (month === 'December') {
+        return 'November';
+    }
+}
 
 const Dashboard = () => {
 
-    // Get current user that logged in
-    const currentUser = useRef(null);
+    // calling hooks to retrieve user that recently logged in
+    const currentUser = useGetUser();
 
-    useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged(async (user) => {
-            if (user) {
-
-                // import our collection in firestore
-                const userDetails = collection(db, "users");
-
-                // get currentUser to be displayed on the bottom side of the page
-                const qUser = query(userDetails, where("email", "==", user?.email));
-                getDocs(qUser).then((querySnapshot) => {
-                    querySnapshot.docs.forEach((doc) => {
-                        currentUser.current = (doc.data().email);
-                    })
-                }).catch((err) => {
-                    console.log("Error getting emails!", err);
-                });
-
-            } else {
-                console.log("Error of auth!");
-            }
-        })
-
-        return unsubscribe;
-    })
-
-    // Get list of every month by selecting dropdown menu
-    const [payments, setPayments] = useState([]);
-    const [prevPayments, setPrevPayments] = useState([]);
-    var previousMonth = useRef('');
+    // calling hooks to retrieve cashflow history
     const [selectedMonth, setSelectedMonth] = useState(getMonthName());
-    const [highestExpense, setHighestExpense] = useState(0);
-    const [isLoading, setIsLoading] = useState(true);
+    const [payments, isLoading] = useFetchCashflowHistory(selectedMonth);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            setIsLoading(true);
-            const schedulerCol = collection(db, 'scheduler');
-            const schedulerQuery = query(schedulerCol);
-            const schedulerSnapshot = await getDocs(schedulerQuery);
-            const docs = [];
-            let highestPaid = 0;
-
-            const findHighestPaid = (highestPaid, doc) => {
-                const amountPaid = doc.data().amountPaid;
-                return amountPaid > highestPaid ? amountPaid : highestPaid;
-            };
-        
-            for (const schedulerDoc of schedulerSnapshot.docs) {
-                const paymentsQuery = query(
-                    collection(schedulerDoc.ref, 'payments'),
-                    where('lastPaid', '>=', new Date(`${selectedMonth} 1, 2023`)),
-                    where('lastPaid', '<=', new Date(`${selectedMonth} 31, 2023`)),
-                    orderBy('lastPaid', 'asc')
-                );
-                const paymentsSnapshot = await getDocs(paymentsQuery);
-            
-                if (!paymentsSnapshot.empty) {
-                    const paymentDocs = paymentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    docs.push({ id: schedulerDoc.id, ...schedulerDoc.data(), payments: paymentDocs });
-                    highestPaid = paymentsSnapshot.docs.reduce(findHighestPaid, highestPaid);
-
-                }
-            }
-        
-            setPayments(docs);
-            setIsLoading(false);
-            setHighestExpense(highestPaid);
-        };
-        
-        if (selectedMonth) {
-            fetchData();
-        }
-    }, [selectedMonth]);
-
-    useEffect(() => {
-        const fetchPrevData = async () => {
-            setIsLoading(true);
-            const schedulerCol = collection(db, 'scheduler');
-            const schedulerQuery = query(schedulerCol);
-            const schedulerSnapshot = await getDocs(schedulerQuery);
-            const docs = [];
-
-            if (selectedMonth === 'January') {
-                previousMonth.current = 'December';
-            } else if (selectedMonth === 'February') {
-                previousMonth.current = 'January';
-            } else if (selectedMonth === 'March') {
-                previousMonth.current = 'February';
-            } else if (selectedMonth === 'April') {
-                previousMonth.current = 'March';
-            } else if (selectedMonth === 'May') {
-                previousMonth.current = 'April';
-            } else if (selectedMonth === 'June') {
-                previousMonth.current = 'May';
-            } else if (selectedMonth === 'July') {
-                previousMonth.current = 'June';
-            } else if (selectedMonth === 'August') {
-                previousMonth.current = 'July';
-            } else if (selectedMonth === 'September') {
-                previousMonth.current = 'August';
-            } else if (selectedMonth === 'October') {
-                previousMonth.current = 'September';
-            } else if (selectedMonth === 'November') {
-                previousMonth.current = 'October';
-            } else if (selectedMonth === 'December') {
-                previousMonth.current = 'November';
-            }
-            
-            for (const schedulerDoc of schedulerSnapshot.docs) {
-
-                const PrevPaymentsQuery = query(
-                    collection(schedulerDoc.ref, 'payments'),
-                    where('lastPaid', '>=', new Date(`${previousMonth.current} 1, 2023`)),
-                    where('lastPaid', '<=', new Date(`${previousMonth.current} 31, 2023`)),
-                    orderBy('lastPaid', 'asc')
-                );
-                const paymentsSnapshot = await getDocs(PrevPaymentsQuery);
-            
-                if (!paymentsSnapshot.empty) {
-                    const paymentDocs = paymentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    docs.push({ id: schedulerDoc.id, ...schedulerDoc.data(), payments: paymentDocs });
-
-                }
-            }
-        
-            setPrevPayments(docs);
-        };
-
-        fetchPrevData();
-    }, [selectedMonth])
+    // calling hooks to retrieve previous month data
+    var previousMonth = useRef('');
+    previousMonth.current = setPreviousMonth(selectedMonth);
+    const [prevPayments] = useFetchPreviousMonthData(setPreviousMonth(selectedMonth));
 
     // render chart when component is mounted
     const chartRef = useRef(null);
-
+    
     useEffect(() => {
         if (payments.length) {
             const myChart = new Chart(chartRef.current, {
@@ -219,7 +124,7 @@ const Dashboard = () => {
             <Container maxWidth="lg">
 
                 <Box display={"flex"} alignItems={"center"} justifyContent="space-around">
-                    <Select size="small" sx={{ textAlign: 'left', marginBottom: '20px'}} value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)}>
+                    <Select size="small" sx={{ textAlign: 'left' }} value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)}>
                         <MenuItem value="January">January</MenuItem>
                         <MenuItem value="February">February</MenuItem>
                         <MenuItem value="March">March</MenuItem>
@@ -245,7 +150,12 @@ const Dashboard = () => {
                 </Box>
                 
                 <div style={{width: "80%", marginTop: "50px", marginLeft: 'auto', marginRight: 'auto'}}>
-                    <canvas ref={chartRef} />
+                    {isLoading ? (
+                        <Skeleton variant="rounded" height={400} />
+                    ) : (
+                        <canvas ref={chartRef} />
+                    )}
+                    
                 </div>
 
                 <div style={{margin: 'auto', width: '100%', marginTop: '65px'}}>
@@ -254,7 +164,13 @@ const Dashboard = () => {
 
                     <TableContainer sx={{borderRadius: '10px', backgroundColor: 'rgb(250,250,250)', marginBottom: '30px'}}>
                         {isLoading ? (
-                            <CircularProgress sx={{padding: '20px'}} />
+                            <div>
+                                <Skeleton variant="rounded" height={30} sx={{marginBottom: '10px'}} />
+                                <Skeleton variant="rounded" height={30} sx={{marginBottom: '10px'}} />
+                                <Skeleton variant="rounded" height={30} sx={{marginBottom: '10px'}} />
+                                <Skeleton variant="rounded" height={30} sx={{marginBottom: '10px'}} />
+                            </div>
+                            
                         ) : (
                             <Table>
                             <TableHead>

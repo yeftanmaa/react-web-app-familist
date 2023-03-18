@@ -1,4 +1,4 @@
-import { Grid, Typography, Button, Paper, Box, Avatar, AvatarGroup, Tooltip } from "@mui/material";
+import { Grid, Typography, Button, Paper, Box, Avatar, AvatarGroup, Tooltip, Skeleton } from "@mui/material";
 import { Container } from "@mui/system";
 import { signOut } from "firebase/auth";
 import { React, useEffect, useState } from "react";
@@ -13,10 +13,10 @@ import { GetFamilyMembers } from "../../utils/firestoreUtils";
 const Item = styled(Paper)(({ theme }) => ({
     backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
     ...theme.typography.body2,
-    padding: '20px 30px',
+    padding: '10px 15px',
     textAlign: 'left',
     marginLeft: '10px',
-    fontSize: '15px',
+    fontSize: '17px',
     color: theme.palette.text.secondary,
 }));
 
@@ -33,6 +33,7 @@ const Profile = () => {
     const [userPhone, setUserPhone] = useState("");
     const [userEmail, setUserEmail] = useState("");
     const [familyMembers, setFamilyMembers] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         const fetchFamilyMembersData = async () => {
@@ -46,6 +47,7 @@ const Profile = () => {
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
             if (user) {
+                setIsLoading(true);
                 const userCollectionRef = collection(db, "users");
                 const q = query(userCollectionRef, where("email", "==", user?.email));
 
@@ -57,6 +59,7 @@ const Profile = () => {
                         setUserPhone(doc.data().phone);
                         setUserEmail(doc.data().email);
                     });
+                    setIsLoading(false);
                 }).catch((error) => {
                     console.log("Error getting documents: ", error);
                 });
@@ -66,7 +69,6 @@ const Profile = () => {
             }
           });
         return unsubscribe;
-        
     }, [])
 
     const handleLogout = () => {
@@ -95,28 +97,45 @@ const Profile = () => {
                             <Typography variant="body1" sx={{fontWeight: '600'}}>Name:</Typography>
                         </Grid>
                         <Grid gridColumn="span 10">
-                            <Item>{userName}</Item>
+                            {isLoading ? (
+                                <Item><Skeleton variant="rounded" height={30}/></Item>
+                            ) : (
+                                <Item>{userName}</Item>
+                            )}
+                            
                         </Grid>
 
                         <Grid gridColumn="span 2">
                             <Typography variant="body1" sx={{fontWeight: '600'}}>About Me:</Typography>
                         </Grid>
                         <Grid gridColumn="span 10">
-                            <Item>{userDesc}</Item>
+                            {isLoading ? (
+                                <Item><Skeleton variant="rounded" height={30}/></Item>
+                            ) : (
+                                <Item>{userDesc}</Item>
+                            )}
                         </Grid>
 
                         <Grid gridColumn="span 2">
                             <Typography variant="body1" sx={{fontWeight: '600'}}>Email: </Typography>
                         </Grid>
                         <Grid gridColumn="span 10">
-                            <Item>{userEmail}</Item>
+                            {isLoading ? (
+                                <Item><Skeleton variant="rounded" height={30}/></Item>
+                            ) : (
+                                <Item>{userEmail}</Item>
+                            )}
                         </Grid>
                         
                         <Grid gridColumn="span 2">
                             <Typography variant="body1" sx={{fontWeight: '600'}}>Phone: </Typography>
                         </Grid>
                         <Grid gridColumn="span 10">
-                            <Item>{userPhone}</Item>
+                            {isLoading ? (
+                                <Item><Skeleton variant="rounded" height={30}/></Item>
+                            ) : (
+                                <Item>{userPhone}</Item>
+                            )}
                         </Grid>
 
                         <Grid gridColumn="span 2"></Grid>

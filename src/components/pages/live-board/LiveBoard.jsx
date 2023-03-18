@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
-import { Fab, Typography, Avatar, InputLabel, Select, MenuItem } from "@mui/material";
+import { Typography, Avatar, InputLabel, Select, MenuItem } from "@mui/material";
 import { Box, Container } from "@mui/system";
 import { collection, query, getDocs, orderBy, limit } from "firebase/firestore";
 import { db } from "../../../config/firebase";
-import AddIcon from '@mui/icons-material/Add';
-import ModalAddTask from "../../modals/AddTask";
 import { GetMemberOnCurrentToken } from "../../utils/firestoreUtils";
 import { getNextMonthName } from '../../utils/DateGenerator';
 
@@ -81,23 +79,9 @@ function App() {
   
   const [columns, setColumns] = useState({});
 
-  // modal handler
-  const [openAddModal, setOpenAddModal] = useState(false);
-
-  const handleOpenAddModal = () => {
-    setOpenAddModal(true);
-  };
-
-  const handleCloseAddModal = () => {
-    setOpenAddModal(false);
-  };
-
   return (
     <div>
       <Container maxWidth="xl">
-        <Box sx={{position: "absolute", bottom: 55, right: 50}}>
-          <Fab onClick={handleOpenAddModal} color="primary"> <AddIcon /> </Fab>
-        </Box>
 
         <Box sx={{display: "flex", justifyContent: 'space-between', alignItems: 'center', marginTop: '45px'}}>
           <Typography variant="h4" style={{ fontWeight: 500 }}>Kanban Board</Typography>
@@ -209,8 +193,8 @@ function App() {
                                             {
                                               (columnId === 'nextpayment') ? '' :
                                               (columnId === 'notpaid') ? 'Tenggat waktu: ' + item.deadline.substring(0, 2) + '/' + currentMonth + '/2023' :
-                                              (item.isCicilan) ? 'Sisa pembayaran: ' + item.payment.remainingBill.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })
-                                              : 'undefined'
+                                              (item.isCicilan) ? 'Sisa pembayaran: ' + item.payment?.remainingBill?.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })
+                                              : ''
                                             }
                                           </Typography>
 
@@ -257,14 +241,6 @@ function App() {
             })}
           </DragDropContext>
         </div>
-
-        {openAddModal && (
-          <ModalAddTask
-            open={openAddModal}
-            handleClose={handleCloseAddModal}
-            onCloseClick={handleCloseAddModal}
-          />
-        )}
       </Container>
     </div>
   );
