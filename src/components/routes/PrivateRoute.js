@@ -1,34 +1,27 @@
 import { useEffect, useState } from 'react';
-import { Outlet, Navigate } from 'react-router-dom'; // v4/5
-import { onAuthStateChanged  } from 'firebase/auth';
+import { Outlet, Navigate } from 'react-router-dom';
+import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../../config/firebase';
 
-const PrivateRoute = props => {
-  const [pending, setPending] = useState(true);
-  const [currentUser, setCurrentUser] = useState();
-
+const PrivateRoute = (props) => {
+  const [authState, setAuthState] = useState({ authPending: true, isAuthenticated: false });
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(
-      auth,
-      user => {
-        setCurrentUser(user);
-        setPending(false);
-      },
-      error => {
-        // any error logging, etc...
-        setPending(false);
-      }
-    );
-
-    return unsubscribe; // <-- clean up subscription
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setAuthState({ authPending: false, isAuthenticated: !!user });
+    });
+    return unsubscribe;
   }, []);
 
-  if (pending) return null; // don't do anything yet
+  if (authState.authPending) {
+    return null;
+  }
 
-  return currentUser 
-    ? <Outlet />                        // <-- render outlet for routes
-    : <Navigate to="/" replace />; // <-- redirect to log in
+  if (authState.isAuthenticated) {
+    return <Outlet />;
+  }
+
+  return <Navigate to="/" replace />;
 };
 
 export default PrivateRoute;
