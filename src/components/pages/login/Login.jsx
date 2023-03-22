@@ -51,6 +51,14 @@ const Login = () => {
         }
     }
 
+    const loginHandlerByKeyPress = async (e) => {
+
+        if (e.keyCode === 13) {
+            e.preventDefault();
+            loginHandler(e);
+        }
+    }
+
     const signInWithGoogle = async () => {
         try {
             const result = await signInWithPopup(auth, googleProvider);
@@ -145,6 +153,7 @@ const Login = () => {
                             autoComplete="current-password"
                             size="small"
                             onChange={(e) => setPassword(e.target.value)}
+                            onKeyDown={loginHandlerByKeyPress}
                             placeholder="Enter your password"
                             style={{width: '300px', margin: '10px 0'}}
                             inputProps={{ style: {fontSize: 15}}}
