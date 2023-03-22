@@ -1,10 +1,11 @@
-import { Button, FormControl, InputLabel, MenuItem, Modal, Select, TextField, Typography } from "@mui/material";
+import { Button, FormControl, InputAdornment, InputLabel, MenuItem, Modal, Select, TextField, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { Timestamp, updateDoc, doc } from "firebase/firestore";
 import React, { useState } from "react";
 import { db } from "../../config/firebase";
 import css from "../styles/global-style.css";
 import SnackbarComponent from "../snackbar";
+import { addLeadingZero, getOrdinalSuffix, parseDeadlineData } from "../utils/DateGenerator";
 
 const style = {
     position: 'absolute',
@@ -18,9 +19,13 @@ const style = {
     p: 4,
 };
 
-const ModalEditScheduler = ({open, handleClose, onCloseClick, desc, title, type, id}) => {
+const ModalEditScheduler = ({open, handleClose, onCloseClick, title, deadline, type, id}) => {
 
-    const [getDesc, setDesc] = useState(desc);
+    const [getDeadline, setDeadline] = useState(deadline);
+
+    // use parsing function to parse deadline date into a number and display in the field
+    const deadlineNumber = parseDeadlineData(getDeadline);
+
     const [getTitle, setTitle] = useState(title);
     const [getType, setType] = useState(type);
     const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -28,11 +33,17 @@ const ModalEditScheduler = ({open, handleClose, onCloseClick, desc, title, type,
     const [snackbarSeverity, setSnackbarSeverity] = useState('success');
 
     const EditScheduler = async () => {
+        // get ordinal suffix
+        const suffix = getOrdinalSuffix(getDeadline);
+
+        // add leading zero if number is one digit
+        const finalDeadlineNumber = addLeadingZero(getDeadline);
+
         const schedulerRef = doc(db, 'scheduler', id);
         const newValue = {
             createdAt: Timestamp.fromDate(new Date()),
-            desc: getDesc,
             title: getTitle,
+            deadline: finalDeadlineNumber + suffix + ' of the month',
             type: getType
         }
 
@@ -44,7 +55,7 @@ const ModalEditScheduler = ({open, handleClose, onCloseClick, desc, title, type,
             setTimeout(() => {
                 setSnackbarOpen(false);
                 window.location.reload();
-            }, 3000);
+            }, 1500);
         } catch(err) {
             console.error("Error!", err);
             setSnackbarMessage('Error! Could not edit the scheduler.');
@@ -52,7 +63,7 @@ const ModalEditScheduler = ({open, handleClose, onCloseClick, desc, title, type,
             setSnackbarOpen(true);
             setTimeout(() => {
                 setSnackbarOpen(false);
-            }, 3000);
+            }, 1500);
         }
     };
 
@@ -84,18 +95,25 @@ const ModalEditScheduler = ({open, handleClose, onCloseClick, desc, title, type,
                         }}
                     />
 
-                    <TextField
+                    <TextField 
+                        label="Payment Deadline"
                         id="outlined-multiline-static"
-                        label="Description"
-                        type="text"
-                        multiline
-                        value={getDesc}
-                        onChange={(e) => setDesc(e.target.value)}
-                        rows={4}
-                        size="small"
+                        sx={{marginTop: '25px', marginBottom: '15px'}}
                         fullWidth
-                        placeholder="Add some details for your new scheduler"
-                        inputProps={{style: {fontSize: 15}}}
+                        
+                        type="number"
+                        value={deadlineNumber}
+                        onChange={(e) => setDeadline(e.target.value)}
+                        size="small"
+                        placeholder="Date of Deadline"
+                        InputProps={{
+                            style: {fontSize: 15},
+                            endAdornment: <InputAdornment position="start">Of the month</InputAdornment>,
+                            inputProps: {
+                                min: 1,
+                                max: 31
+                            }
+                        }}
                     />
 
                     <FormControl sx={{marginTop: '15px'}} fullWidth>

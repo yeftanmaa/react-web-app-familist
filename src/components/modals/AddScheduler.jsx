@@ -7,6 +7,7 @@ import css from "../styles/global-style.css";
 import SnackbarComponent from "../snackbar";
 import { GetMemberOnCurrentToken } from "../utils/firestoreUtils";
 import InputAdornment from '@mui/material/InputAdornment';
+import { addLeadingZero, getOrdinalSuffix } from "../utils/DateGenerator";
 
 const style = {
     position: 'absolute',
@@ -59,6 +60,12 @@ const ModalAddScheduler = ({open, handleClose, onCloseClick}) => {
     }, [])
 
     const HandleSave = async() => {
+        // generate ordinal suffix
+        const suffix = getOrdinalSuffix(schedulerDeadline);
+
+        // add leading zero if deadline is one digit
+        const finalDeadlineNumber = addLeadingZero(schedulerDeadline);
+
         // not allowing empty title neither type
         if (schedulerTitle === "") {
             alert('Scheduler title is mandatory!');
@@ -70,7 +77,7 @@ const ModalAddScheduler = ({open, handleClose, onCloseClick}) => {
                     createdAt: Timestamp.fromDate(new Date()),
                     title: schedulerTitle,
                     assignee: schedulerAssignee,
-                    deadline: schedulerDeadline + ' of the month',
+                    deadline: finalDeadlineNumber + suffix + ' of the month',
                     type: schedulerType,
                 }
 
@@ -100,14 +107,14 @@ const ModalAddScheduler = ({open, handleClose, onCloseClick}) => {
                 setTimeout(() => {
                     setSnackbarOpen(false);
                     window.location.reload();
-                }, 3000);
+                }, 1500);
             } catch(err) {
                 setSnackbarMessage('Error! Could not add new scheduler.');
                 setSnackbarSeverity('error');
                 setSnackbarOpen(true);
                 setTimeout(() => {
                     setSnackbarOpen(false);
-                }, 3000);
+                }, 1500);
             };
         };
     };
@@ -162,7 +169,7 @@ const ModalAddScheduler = ({open, handleClose, onCloseClick}) => {
                         type="number"
                         size="small"
                         onChange={(e) => setSchedulerDeadline(e.target.value)}
-                        placeholder="Name of this scheduler"
+                        placeholder="Date of Deadline"
                         InputProps={{
                             style: {fontSize: 15},
                             endAdornment: <InputAdornment position="start" >Of the month</InputAdornment>

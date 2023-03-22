@@ -35,7 +35,7 @@ const ModalDeleteScheduler = ({open, handleClose, onCloseClick, docID}) => {
                 setTimeout(() => {
                     setSnackbarOpen(false);
                     window.location.reload();
-                }, 3000);
+                }, 1500);
         } catch(err) {
             console.error("Error!", err);
             setSnackbarMessage('Error! Could not delete the scheduler.');
@@ -43,7 +43,7 @@ const ModalDeleteScheduler = ({open, handleClose, onCloseClick, docID}) => {
             setSnackbarOpen(true);
             setTimeout(() => {
                 setSnackbarOpen(false);
-            }, 3000);
+            }, 1500);
         }
     };
 

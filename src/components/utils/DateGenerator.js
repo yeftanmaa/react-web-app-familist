@@ -25,3 +25,38 @@ export function getNextMonthName() {
 
     return monthNames[currentDate.getMonth()+1];
 }
+
+export function getOrdinalSuffix(num) {
+    const lastDigit = num % 10;
+    const lastTwoDigits = num % 100;
+
+    if (lastTwoDigits >= 11 && lastTwoDigits <= 13) {
+        return "th";
+      } else if (lastDigit === 1) {
+        return "st";
+      } else if (lastDigit === 2) {
+        return "nd";
+      } else if (lastDigit === 3) {
+        return "rd";
+      } else {
+        return "th";
+      }
+}
+
+export function addLeadingZero(num) {
+    if (num >= 1 && num <= 9) {
+        return "0" + num;
+    } else {
+        return num;
+    }
+}
+
+export function parseDeadlineData(deadline) {
+    const regex = /^[0-9][1,2,3,4,5,6,7,8,9,0]/;
+    const match = regex.exec(deadline);
+
+    if (match) {
+        return match[0];
+    }
+    return null;
+}
