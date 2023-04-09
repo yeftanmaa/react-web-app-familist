@@ -95,9 +95,19 @@ const ModalAddScheduler = ({open, handleClose, onCloseClick}) => {
                 const schedulerRef = collection(db, "scheduler");
                 const newSchedulerDoc = await addDoc(schedulerRef, newSchedulerData);
 
-                /// Create a new document in the payments subcollection
+                /// Create a new document in the payments subcollection 
                 const paymentsRef = collection(newSchedulerDoc, "payments");
-                const paymentData = { remainingBill: Number(installmentTotalPayment) };
+                const paymentData = {   
+                    remainingBill: Number(installmentTotalPayment),
+                    lastPaid: Timestamp.fromDate(new Date())
+                };
+
+                if (isBillFixed) {
+                    paymentData.amountPaid = Number(billFixedAmount)
+                } else {
+                    paymentData.amountPaid = 0;
+                }
+
                 await addDoc(paymentsRef, paymentData);
 
                 // confirm if data successfully saved

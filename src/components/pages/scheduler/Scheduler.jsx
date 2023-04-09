@@ -31,6 +31,7 @@ const Scheduler = () => {
     const [selectSchedulerRemainingBill, setSelectSchedulerRemainingBill] = useState('');
     const [selectSchedulerTotalBill, setSelectSchedulerTotalBill] = useState('');
     const [selectSchedulerDeadline, setSelectSchedulerDeadline] = useState('');
+    const [selectSchedulerFixedBill, setSelectSchedulerFixedBill] = useState('');
 
     const handleOpenModal = () => {
         setOpenModal(true);
@@ -49,11 +50,12 @@ const Scheduler = () => {
         setOpenDeleteModal(false);
     }
 
-    const handleOpenEditModal = (title, deadline, type, id) => {
+    const handleOpenEditModal = (title, deadline, type, fixedBill, id) => {
         setOpenEditModal(true);
         setSelectSchedulerTitle(title);
         setSelectSchedulerDeadline(deadline);
         setSelectSchedulerType(type);
+        setSelectSchedulerFixedBill(fixedBill);
         setSelectDocumentId(id);
     }
 
@@ -178,7 +180,7 @@ const Scheduler = () => {
                                             <TableCell sx={{fontSize: 17}}>{item.payment.lastPaid.toDate().toLocaleString()}</TableCell>
                                             <TableCell sx={{fontSize: 17}}>{item.deadline.substring(0, 2) + "/" + nextMonthWithYear}</TableCell>
                                             <TableCell align="center">
-                                                <IconButton onClick={() => handleOpenEditModal(item.title, item.deadline, item.type, item.id)} size="large">
+                                                <IconButton onClick={() => handleOpenEditModal(item.title, item.deadline, item.type, item.fixedBill, item.id)} size="large">
                                                     <EditIcon color="primary" />
                                                 </IconButton>
 
@@ -223,6 +225,7 @@ const Scheduler = () => {
                                             title={selectSchedulerTitle}
                                             deadline={selectSchedulerDeadline}
                                             type={selectSchedulerType}
+                                            fixedBill = {selectSchedulerFixedBill}
                                             id={selectDocumentId}
                                         />)
                                     }

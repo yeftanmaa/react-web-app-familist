@@ -1,7 +1,7 @@
 import { Button, FormControl, InputAdornment, InputLabel, MenuItem, Modal, Select, TextField, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { Timestamp, updateDoc, doc } from "firebase/firestore";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { db } from "../../config/firebase";
 import css from "../styles/global-style.css";
 import SnackbarComponent from "../snackbar";
@@ -19,7 +19,7 @@ const style = {
     p: 4,
 };
 
-const ModalEditScheduler = ({open, handleClose, onCloseClick, title, deadline, type, id}) => {
+const ModalEditScheduler = ({open, handleClose, onCloseClick, title, deadline, type, fixedBill, id}) => {
 
     const [getDeadline, setDeadline] = useState(deadline);
 
@@ -28,9 +28,19 @@ const ModalEditScheduler = ({open, handleClose, onCloseClick, title, deadline, t
 
     const [getTitle, setTitle] = useState(title);
     const [getType, setType] = useState(type);
+    const [getFixedBill, setFixedBill] = useState(fixedBill);
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
     const [snackbarSeverity, setSnackbarSeverity] = useState('success');
+
+    // Check if deadline changed
+    const [isDeadlineChanged, SetIsDeadlineChanged] = useState(false);
+
+    useEffect(() => {
+        if (getDeadline !== deadline) {
+            SetIsDeadlineChanged(true);
+        }
+    }, [getDeadline, deadline])
 
     const EditScheduler = async () => {
         // get ordinal suffix
@@ -43,8 +53,15 @@ const ModalEditScheduler = ({open, handleClose, onCloseClick, title, deadline, t
         const newValue = {
             createdAt: Timestamp.fromDate(new Date()),
             title: getTitle,
-            deadline: finalDeadlineNumber + suffix + ' of the month',
             type: getType
+        }
+
+        if (getFixedBill !== undefined) {
+            newValue.fixedBill = Number(getFixedBill);
+        }
+
+        if (isDeadlineChanged) {
+            newValue.deadline = finalDeadlineNumber + suffix + ' of the month'
         }
 
         try {
@@ -98,9 +115,8 @@ const ModalEditScheduler = ({open, handleClose, onCloseClick, title, deadline, t
                     <TextField 
                         label="Payment Deadline"
                         id="outlined-multiline-static"
-                        sx={{marginTop: '25px', marginBottom: '15px'}}
+                        sx={{marginTop: '15px', marginBottom: '15px'}}
                         fullWidth
-                        
                         type="number"
                         value={deadlineNumber}
                         onChange={(e) => setDeadline(e.target.value)}
@@ -115,6 +131,23 @@ const ModalEditScheduler = ({open, handleClose, onCloseClick, title, deadline, t
                             }
                         }}
                     />
+
+                    {getFixedBill === undefined ? "" : (
+                        <TextField 
+                            label="Fixed Bill"
+                            id="outlined-multiline-static"
+                            sx={{marginTop: '15px', marginBottom: '15px'}}
+                            fullWidth
+                            type="number"
+                            value={getFixedBill}
+                            onChange={(e) => setFixedBill(e.target.value)}
+                            size="small"
+                            placeholder="How much the cost?"
+                            InputProps={{
+                                style: {fontSize: 15}
+                            }}
+                        />
+                    )}
 
                     <FormControl sx={{marginTop: '15px'}} fullWidth>
                         <InputLabel id="select-schedule-type-label">Scheduler Type</InputLabel>
