@@ -6,6 +6,7 @@ import { db } from "../../config/firebase";
 import css from "../styles/global-style.css";
 import SnackbarComponent from "../snackbar";
 import { FetchAllSchedulers } from "../../hooks/useFetchScheduler";
+import { GetPreviousMonthRemainingBill } from "../utils/firestoreUtils";
 
 const style = {
     position: 'absolute',
@@ -91,7 +92,8 @@ const ModalPayBills = ({open, handleClose, onCloseClick, getLatestEarning}) => {
 
                 // If it is a cicilan then set remainingBill
                 if (selectedScheduler.isCicilan === true) {
-                    newPayment.remainingBill = Number(selectedScheduler.totalBills) - Number(expense);
+                    const prevRemainingBill = await GetPreviousMonthRemainingBill(schedulerId);
+                    newPayment.remainingBill = Number(prevRemainingBill) - Number(expense);
                 }
 
                 await addDoc(schedulerRef, newPayment);

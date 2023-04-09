@@ -1,5 +1,5 @@
 import { db } from "../../config/firebase";
-import { collection, getDocs, limit, orderBy, query, where, Timestamp, doc, updateDoc } from "firebase/firestore";
+import { collection, getDocs, limit, orderBy, query, where, Timestamp, doc, updateDoc, collectionGroup } from "firebase/firestore";
 
 export const getUserInfo = async (currentUserToken) => {
     const querySnapshot = await getDocs(
@@ -103,14 +103,20 @@ export const GetPreviousMonthRemainingBill = async (schedulerID) => {
     const firstDay = new Date(lastMonth.getFullYear(), lastMonth.getMonth(), 1);
     const lastDay = new Date(lastMonth.getFullYear(), lastMonth.getMonth() + 1, 0);
 
-    const paymentsQuery = query(collection(doc(db, "scheduler", schedulerID), "payments"), where("lastPaid", ">=", firstDay), where("lastPaid", "<=", lastDay));
-    const paymentsSnapshot = await getDocs(paymentsQuery);
+    try {
+        const q = query(collectionGroup(db, "payments"), where("lastPaid", ">=", firstDay), where("lastPaid", "<=", lastDay));
+        const querySnapshot = await getDocs(q);
 
-    let totalRemainingBill = 0;
+        let totalRemainingBill = 0;
 
-    paymentsSnapshot.forEach((doc) => {
-        totalRemainingBill += doc.data().remainingBill;
-    });
-
-    return totalRemainingBill;
+        querySnapshot.forEach((doc) => {
+            if (doc.ref.parent.parent.id === schedulerID) {
+                totalRemainingBill += doc.data().remainingBill;
+            }
+        });
+        return totalRemainingBill;
+    } catch (e) {
+        console.error("Error fetching data: ", e);
+        return null;
+    }
 }
