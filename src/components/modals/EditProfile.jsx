@@ -49,7 +49,7 @@ const ModalEditProfile = ({open, handleClose, onCloseClick, name, desc, email, p
                 setTimeout(() => {
                     setSnackbarOpen(false);
                     window.location.reload();
-                }, 3000);
+                }, 1500);
             } catch(err) {
                 console.error("Error!", err);
                 setSnackbarMessage('Error! Could not update user profile.');
@@ -57,7 +57,7 @@ const ModalEditProfile = ({open, handleClose, onCloseClick, name, desc, email, p
                 setSnackbarOpen(true);
                 setTimeout(() => {
                     setSnackbarOpen(false);
-                }, 3000);
+                }, 1500);
             }
         }
     };

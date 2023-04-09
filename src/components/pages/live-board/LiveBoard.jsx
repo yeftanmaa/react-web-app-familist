@@ -80,6 +80,10 @@ function App() {
 
     setColumns(taskStatus);
   }, [data, currentMonth])
+
+    // Filtering cards based on user selection
+    const filteredData = data.filter((scheduler) => scheduler.assignee === selectedAssignee);
+    console.log(filteredData);
   
   const [columns, setColumns] = useState({});
 
@@ -107,7 +111,7 @@ function App() {
               onChange={handleFilterAssignee}
               style={{ minWidth: '200px' }}
             >
-              <MenuItem value="">All</MenuItem>
+              <MenuItem value="All">All</MenuItem>
               {memberList.map((member) => (
                 <MenuItem value={member.name}>{member.name}</MenuItem>
               ))}
@@ -159,91 +163,177 @@ function App() {
                              skeletonArray
                           ) : (
                             <>
-                              {/* we put every cards inside the columns */}
-                              {column.items.map((item, index) => {
-                                return (
-                                  // then we make each cards is draggable
-                                  <Draggable>
-                                    {(provided, snapshot) => {
-                                      return (
-                                        <div
-                                          ref={provided.innerRef}
-                                          {...provided.draggableProps}
-                                          {...provided.dragHandleProps}
-                                          style={{
-                                            userSelect: "none",
-                                            padding: 15,
-                                            borderRadius: '7px',
-                                            margin: "0 0 15px 0",
-                                            minHeight: "120px",
-                                            backgroundColor: snapshot.isDragging
-                                              ? "white"
-                                              : "white",
-                                            color: "black",
-                                            boxShadow: '0px 1px 4px rgba(0, 0, 0, 0.1)',
-                                            position: 'relative',
-                                            ...provided.draggableProps.style
-                                          }}
-                                        >
-                                          <Box position={"absolute"} top={13} right={11}>
-                                            <Box>
-                                              {
-                                                item.isCicilan ? (
-                                                  <Box sx={{backgroundColor: '#aa16db', padding: '3px 10px', borderRadius: '20px'}}>
-                                                    <Typography variant="caption" color={"white"}>Cicilan</Typography>
-                                                  </Box>
-                                                ) : (
-                                                  <Box sx={{backgroundColor: 'rgba(36, 79, 255, 0.8)', padding: '3px 10px', borderRadius: '20px'}}>
-                                                    <Typography variant="caption" color={"white"}>Tagihan Reguler</Typography>
-                                                  </Box>
-                                              )}
+                              {/* if selectedAssignee is not all, card will shows based on user selection. Otherwise every cards will be showed up */}
+                              {selectedAssignee !== "All" ? (
+                                filteredData.map((item, index) => {
+                                  return (
+                                    <Draggable>
+                                      {(provided, snapshot) => {
+                                        return (
+                                          <div
+                                            ref={provided.innerRef}
+                                            {...provided.draggableProps}
+                                            {...provided.dragHandleProps}
+                                            style={{
+                                              userSelect: "none",
+                                              padding: 15,
+                                              borderRadius: '7px',
+                                              margin: "0 0 15px 0",
+                                              minHeight: "120px",
+                                              backgroundColor: snapshot.isDragging
+                                                ? "white"
+                                                : "white",
+                                              color: "black",
+                                              boxShadow: '0px 1px 4px rgba(0, 0, 0, 0.1)',
+                                              position: 'relative',
+                                              ...provided.draggableProps.style
+                                            }}
+                                          >
+                                            <Box position={"absolute"} top={13} right={11}>
+                                              <Box>
+                                                {
+                                                  item.isCicilan ? (
+                                                    <Box sx={{backgroundColor: '#aa16db', padding: '3px 10px', borderRadius: '20px'}}>
+                                                      <Typography variant="caption" color={"white"}>Cicilan</Typography>
+                                                    </Box>
+                                                  ) : (
+                                                    <Box sx={{backgroundColor: 'rgba(36, 79, 255, 0.8)', padding: '3px 10px', borderRadius: '20px'}}>
+                                                      <Typography variant="caption" color={"white"}>Tagihan Reguler</Typography>
+                                                    </Box>
+                                                )}
+                                              </Box>
                                             </Box>
-                                          </Box>
+                                            
+                                            <Typography>{item.title}</Typography>
+  
+                                            <Box sx={{maxWidth: '260px', marginTop: 1}}>
+                                              <Typography sx={{ fontSize: 13, color: 'black'}}>
+                                                {
+                                                  (columnId === 'nextpayment') ? '' :
+                                                  (columnId === 'notpaid') ? 'Tenggat waktu: ' + item.deadline.substring(0, 2) + '/' + currentMonth + '/2023' :
+                                                  (item.isCicilan) ? 'Sisa pembayaran: ' + item.payment?.remainingBill?.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })
+                                                  : ''
+                                                }
+                                              </Typography>
+  
+                                              <Typography fontStyle={'italic'} sx={{ fontSize: 13, color: '#C9C9C9'}}>
+                                                {
+                                                  (columnId === 'nextpayment') ? "Next Payment: " + getNextMonthName() + ' ' + currentYear :
+                                                  (columnId === 'notpaid') ? 'Terakhir dibayar: ' + item.payment.lastPaid.toDate().toLocaleDateString() :
+                                                  (columnId === 'paid') ? 'Paid on: ' + item.payment.lastPaid.toDate().toLocaleDateString()
+                                                  : 'undefined'
+                                                }
+                                              </Typography>
+  
+                                            </Box>
+  
+                                            <Box position={"absolute"} bottom={10} left={15}>
+                                              <Typography variant="h6" sx={{color: '#c4183b', fontWeight: 600, fontSize: '16px'}} >
+                                                {
+                                                  (item.fixedBill === undefined && columnId !== 'nextpayment') ? item.payment.amountPaid?.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' }) :
+                                                  (columnId === 'nextpayment' && item.fixedBill === undefined) ? (<Typography color={'grey'}>Not measured</Typography>) :
+                                                  item.fixedBill?.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })
+                                                }
+                                              </Typography>
+                                            </Box>
+  
+                                            <Box position={"absolute"} bottom={10} right={10} display={"flex"} alignItems={"center"} gap={1}>
+                                              <Avatar sx={{width: 32, height: 32, fontSize: 15}}>{selectedAssignee.slice(0,2).toUpperCase()}</Avatar>
+                                            </Box>
+                                            
+                                          </div>
                                           
-                                          <Typography>{item.title}</Typography>
-
-                                          <Box sx={{maxWidth: '260px', marginTop: 1}}>
-                                            <Typography sx={{ fontSize: 13, color: 'black'}}>
-                                              {
-                                                (columnId === 'nextpayment') ? '' :
-                                                (columnId === 'notpaid') ? 'Tenggat waktu: ' + item.deadline.substring(0, 2) + '/' + currentMonth + '/2023' :
-                                                (item.isCicilan) ? 'Sisa pembayaran: ' + item.payment?.remainingBill?.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })
-                                                : ''
-                                              }
-                                            </Typography>
-
-                                            <Typography fontStyle={'italic'} sx={{ fontSize: 13, color: '#C9C9C9'}}>
-                                              {
-                                                (columnId === 'nextpayment') ? "Next Payment: " + getNextMonthName() + ' ' + currentYear :
-                                                (columnId === 'notpaid') ? 'Terakhir dibayar: ' + item.payment.lastPaid.toDate().toLocaleDateString() :
-                                                (columnId === 'paid') ? 'Paid on: ' + item.payment.lastPaid.toDate().toLocaleDateString()
-                                                : 'undefined'
-                                              }
-                                            </Typography>
-
-                                          </Box>
-
-                                          <Box position={"absolute"} bottom={10} left={15}>
-                                            <Typography variant="h6" sx={{color: '#c4183b', fontWeight: 600, fontSize: '16px'}} >
-                                              {
-                                                (item.fixedBill === undefined && columnId !== 'nextpayment') ? item.payment.amountPaid?.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' }) :
-                                                (columnId === 'nextpayment' && item.fixedBill === undefined) ? (<Typography color={'grey'}>Not measured</Typography>) :
-                                                item.fixedBill?.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })
-                                              }
-                                            </Typography>
-                                          </Box>
-
-                                          <Box position={"absolute"} bottom={10} right={10} display={"flex"} alignItems={"center"} gap={1}>
-                                            <Avatar sx={{width: 32, height: 32, fontSize: 15}}>T</Avatar>
-                                          </Box>
+                                        );
+                                      }}
+                                    </Draggable>
+                                  );
+                                })
+                              ) : (
+                                column.items.map((item, index) => {
+                                  return (
+                                    // then we make each cards is draggable
+                                    <Draggable>
+                                      {(provided, snapshot) => {
+                                        return (
+                                          <div
+                                            ref={provided.innerRef}
+                                            {...provided.draggableProps}
+                                            {...provided.dragHandleProps}
+                                            style={{
+                                              userSelect: "none",
+                                              padding: 15,
+                                              borderRadius: '7px',
+                                              margin: "0 0 15px 0",
+                                              minHeight: "120px",
+                                              backgroundColor: snapshot.isDragging
+                                                ? "white"
+                                                : "white",
+                                              color: "black",
+                                              boxShadow: '0px 1px 4px rgba(0, 0, 0, 0.1)',
+                                              position: 'relative',
+                                              ...provided.draggableProps.style
+                                            }}
+                                          >
+                                            <Box position={"absolute"} top={13} right={11}>
+                                              <Box>
+                                                {
+                                                  item.isCicilan ? (
+                                                    <Box sx={{backgroundColor: '#aa16db', padding: '3px 10px', borderRadius: '20px'}}>
+                                                      <Typography variant="caption" color={"white"}>Cicilan</Typography>
+                                                    </Box>
+                                                  ) : (
+                                                    <Box sx={{backgroundColor: 'rgba(36, 79, 255, 0.8)', padding: '3px 10px', borderRadius: '20px'}}>
+                                                      <Typography variant="caption" color={"white"}>Tagihan Reguler</Typography>
+                                                    </Box>
+                                                )}
+                                              </Box>
+                                            </Box>
+                                            
+                                            <Typography>{item.title}</Typography>
+  
+                                            <Box sx={{maxWidth: '260px', marginTop: 1}}>
+                                              <Typography sx={{ fontSize: 13, color: 'black'}}>
+                                                {
+                                                  (columnId === 'nextpayment') ? '' :
+                                                  (columnId === 'notpaid') ? 'Tenggat waktu: ' + item.deadline.substring(0, 2) + '/' + currentMonth + '/2023' :
+                                                  (item.isCicilan) ? 'Sisa pembayaran: ' + item.payment?.remainingBill?.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })
+                                                  : ''
+                                                }
+                                              </Typography>
+  
+                                              <Typography fontStyle={'italic'} sx={{ fontSize: 13, color: '#C9C9C9'}}>
+                                                {
+                                                  (columnId === 'nextpayment') ? "Next Payment: " + getNextMonthName() + ' ' + currentYear :
+                                                  (columnId === 'notpaid') ? 'Terakhir dibayar: ' + item.payment.lastPaid.toDate().toLocaleDateString() :
+                                                  (columnId === 'paid') ? 'Paid on: ' + item.payment.lastPaid.toDate().toLocaleDateString()
+                                                  : 'undefined'
+                                                }
+                                              </Typography>
+  
+                                            </Box>
+  
+                                            <Box position={"absolute"} bottom={10} left={15}>
+                                              <Typography variant="h6" sx={{color: '#c4183b', fontWeight: 600, fontSize: '16px'}} >
+                                                {
+                                                  (item.fixedBill === undefined && columnId !== 'nextpayment') ? item.payment.amountPaid?.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' }) :
+                                                  (columnId === 'nextpayment' && item.fixedBill === undefined) ? (<Typography color={'grey'}>Not measured</Typography>) :
+                                                  item.fixedBill?.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })
+                                                }
+                                              </Typography>
+                                            </Box>
+  
+                                            <Box position={"absolute"} bottom={10} right={10} display={"flex"} alignItems={"center"} gap={1}>
+                                              <Avatar sx={{width: 32, height: 32, fontSize: 15}}>{item.assignee.slice(0,2).toUpperCase()}</Avatar>
+                                            </Box>
+                                            
+                                          </div>
                                           
-                                        </div>
-                                        
-                                      );
-                                    }}
-                                  </Draggable>
-                                );
-                              })}
+                                        );
+                                      }}
+                                    </Draggable>
+                                  );
+                                })
+                              )}
                               {provided.placeholder}
                             </>
                           )}

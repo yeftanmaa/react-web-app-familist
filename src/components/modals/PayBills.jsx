@@ -64,8 +64,6 @@ const ModalPayBills = ({open, handleClose, onCloseClick, getLatestEarning}) => {
         }
     }, [selectBill, schedulerList]);
 
-    console.log(schedulerId);
-
     const HandleSave = async() => {
         // not allowing empty earning input
         if (expense === 0) {
@@ -74,14 +72,14 @@ const ModalPayBills = ({open, handleClose, onCloseClick, getLatestEarning}) => {
             setSnackbarOpen(true);
             setTimeout(() => {
                 setSnackbarOpen(false);
-            }, 3000);
+            }, 1500);
         } else if (Number(expense) > Number(getLatestEarning)) {
             setSnackbarMessage('Expense could not exceed current earnings!');
             setSnackbarSeverity('error');
             setSnackbarOpen(true);
             setTimeout(() => {
                 setSnackbarOpen(false);
-            }, 3000);
+            }, 1500);
         } else {
             try {
                 const schedulerRef = collection(db, 'scheduler', schedulerId, 'payments');
@@ -92,7 +90,7 @@ const ModalPayBills = ({open, handleClose, onCloseClick, getLatestEarning}) => {
                 };
 
                 // If it is a cicilan then set remainingBill
-                if (selectedScheduler.isCicilan === undefined) {
+                if (selectedScheduler.isCicilan === true) {
                     newPayment.remainingBill = Number(selectedScheduler.totalBills) - Number(expense);
                 }
 
@@ -105,14 +103,14 @@ const ModalPayBills = ({open, handleClose, onCloseClick, getLatestEarning}) => {
                 setTimeout(() => {
                     setSnackbarOpen(false);
                     window.location.reload();
-                }, 3000);
+                }, 1500);
             } catch(err) {
                 setSnackbarMessage('Error! Could not add your income.');
                 setSnackbarSeverity('error');
                 setSnackbarOpen(true);
                 setTimeout(() => {
                     setSnackbarOpen(false);
-                }, 3000);
+                }, 1500);
             };
         };
     };

@@ -75,7 +75,7 @@ function ModalAddTask({ open, handleClose, onCloseClick }) {
                     setSnackbarOpen(true);
                     setTimeout(() => {
                         setSnackbarOpen(false);
-                    }, 3000);
+                    }, 1500);
                 
                 } 
             }

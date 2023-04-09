@@ -58,7 +58,7 @@ function ModalEditTask({ open, handleClose, onCloseClick, desc, priceEstimation,
             setTimeout(() => {
                 setSnackbarOpen(false);
                 window.location.reload();
-            }, 3000);
+            }, 1500);
         } catch(err) {
             console.error("Error!", err);
             setSnackbarMessage('Error! Could not edit the payment.');
@@ -66,7 +66,7 @@ function ModalEditTask({ open, handleClose, onCloseClick, desc, priceEstimation,
             setSnackbarOpen(true);
             setTimeout(() => {
                 setSnackbarOpen(false);
-            }, 3000);
+            }, 1500);
         }
     };
 

@@ -96,3 +96,21 @@ export const GetMemberOnCurrentToken = async (keyValue) => {
         alert("No Users in this workspace!");
     }
 };
+
+export const GetPreviousMonthRemainingBill = async (schedulerID) => {
+    const today = new Date();
+    const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    const firstDay = new Date(lastMonth.getFullYear(), lastMonth.getMonth(), 1);
+    const lastDay = new Date(lastMonth.getFullYear(), lastMonth.getMonth() + 1, 0);
+
+    const paymentsQuery = query(collection(doc(db, "scheduler", schedulerID), "payments"), where("lastPaid", ">=", firstDay), where("lastPaid", "<=", lastDay));
+    const paymentsSnapshot = await getDocs(paymentsQuery);
+
+    let totalRemainingBill = 0;
+
+    paymentsSnapshot.forEach((doc) => {
+        totalRemainingBill += doc.data().remainingBill;
+    });
+
+    return totalRemainingBill;
+}
