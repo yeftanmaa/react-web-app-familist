@@ -94,7 +94,7 @@ const ModalSchedulerDetails = ({ open, handleClose, onCloseClick, title, type, l
                             <Typography>: {getLastPaid}</Typography>
                         </Grid>
                         
-                        {currentMonth == getLastPaid.substring(0,1) ? (
+                        {currentMonth === getLastPaid.substring(0,1) ? (
                             <>
                                 <Grid gridColumn="span 12">
                                     <Typography color={"green"}>You have paid for this month</Typography>
