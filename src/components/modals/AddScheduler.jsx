@@ -95,7 +95,7 @@ const ModalAddScheduler = ({open, handleClose, onCloseClick}) => {
                 const schedulerRef = collection(db, "scheduler");
                 const newSchedulerDoc = await addDoc(schedulerRef, newSchedulerData);
 
-                /// Create a new document in the payments subcollection 
+                // Create a new document in the payments subcollection 
                 const paymentsRef = collection(newSchedulerDoc, "payments");
                 const paymentData = {   
                     remainingBill: Number(installmentTotalPayment),

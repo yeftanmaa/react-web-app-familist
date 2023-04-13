@@ -109,9 +109,6 @@ const Registration = () => {
     //     setOpen(false);
     // };
 
-    
-    console.log(typeOfUser);
-
     // Toggle button
     const [showPassword, setShowPassword] = useState(false);
 
@@ -269,7 +266,7 @@ const Registration = () => {
                         </Box>  
                     )} */}
 
-                    <Button onClick={handleRegistration} disabled={typeOfUser === 'Workspace Admin' && getToken === ''}  variant="contained" sx={{width: '300px', backgroundColor: '#1E8CF1', marginTop: '5px'}} disableElevation>Create an account</Button>
+                    <Button onClick={handleRegistration} variant="contained" sx={{width: '300px', backgroundColor: '#1E8CF1', marginTop: '5px'}} disableElevation>Create an account</Button>
 
                     <p style={{opacity: 0.3, position: 'fixed', bottom: 0}}>Copyright 2023. Thesis Project Purposes.</p>
                 </div>

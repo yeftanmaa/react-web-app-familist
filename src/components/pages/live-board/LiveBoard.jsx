@@ -22,7 +22,7 @@ function App() {
   }, [])
 
   // filter by assignee
-  const [selectedAssignee, setSelectedAssignee] = useState("");
+  const [selectedAssignee, setSelectedAssignee] = useState("All");
 
   const handleFilterAssignee = (e) => {
     setSelectedAssignee(e.target.value);
