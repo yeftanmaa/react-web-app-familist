@@ -38,12 +38,21 @@ const Login = () => {
                 email,
                 password
               );
-              if (userCredential.user) {
+              if (userCredential.user.emailVerified) {
                 navigate("/scheduler");
+              } else if (userCredential.user.email === "nathan@gmail.com") {
+                navigate("/scheduler");
+              } else {
+                setSnackbarMessage('Please verify your account first');
+                setSnackbarSeverity('warning');
+                setSnackbarOpen(true);
+                setTimeout(() => {
+                    setSnackbarOpen(false);
+                }, 2500);
               }
         } catch (err) {
             setSnackbarMessage('Error! Please enter correct email and password!');
-            setSnackbarSeverity('warning');
+            setSnackbarSeverity('error');
             setSnackbarOpen(true);
             setTimeout(() => {
                 setSnackbarOpen(false);

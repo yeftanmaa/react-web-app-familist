@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import { Button, Typography, Box, TextField, Snackbar, Select, MenuItem, InputLabel, FormControl, InputAdornment, IconButton } from "@mui/material";
+import { Button, Typography, Box, TextField, InputAdornment, IconButton } from "@mui/material";
 import css from "../../styles/global-style.css";
 import { Container } from "@mui/system";
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { auth, db } from "../../../config/firebase";
 import { useNavigate } from "react-router-dom";
 import { collection, addDoc } from "firebase/firestore";
-import { GenerateToken } from "../../utils/tokenGenerator";
+// import { GenerateToken } from "../../utils/tokenGenerator";
 import SnackbarComponent from "../../snackbar";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 
@@ -16,13 +16,12 @@ const Registration = () => {
     // navigation component
     const navigate = useNavigate();
 
-    const [getToken, setToken] = useState("");
     const [newName, setNewName] = useState("");
     const [newEmail, setNewEmail] = useState("");
     const [newPhoneNumber, setNewPhoneNumber] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
-    const [typeOfUser, setTypeOfUser] = useState("");
+    // const [typeOfUser, setTypeOfUser] = useState("");
 
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
@@ -40,15 +39,11 @@ const Registration = () => {
                 setTimeout(() => {
                     setSnackbarOpen(false);
                     navigate('/');
-                }, 3000);
+                }, 1500);
         };
 
         // check if password and confirmPassword are matched
         if (newPassword === confirmPassword) {
-            
-            if (typeOfUser === 'Normal User') {
-                setToken('n4th4nSpace');
-            }
 
             try {
                 // create a new user in Firebase Auth
@@ -64,7 +59,7 @@ const Registration = () => {
                     phone: newPhoneNumber,
                     description: 'Hi, I am new to Familist!',
                     password: newPassword,
-                    token: getToken
+                    token: 'n4th4nSpace'
                 });
 
                 // confirm to user and navigate to login
@@ -74,7 +69,7 @@ const Registration = () => {
                 setTimeout(() => {
                     setSnackbarOpen(false);
                     navigate('/');
-                }, 1500);
+                }, 2500);
             } catch(err) {
                 setSnackbarMessage('Error! Could not create your account.');
                 setSnackbarSeverity('error');
@@ -94,28 +89,25 @@ const Registration = () => {
         setSnackbarOpen(false);
     }
 
-    const [open, setOpen] = useState(false);
+    // const [open, setOpen] = useState(false);
 
-    const handleClick = () => {
-        setOpen(true);
+    // const handleClick = () => {
+    //     setOpen(true);
 
-        // generate token
-        const generateToken = GenerateToken();
-        setToken(generateToken);
+    //     // generate token
+    //     const generateToken = GenerateToken();
+    //     setToken(generateToken);
 
-        navigator.clipboard.writeText(generateToken);
-    };
+    //     navigator.clipboard.writeText(generateToken);
+    // };
 
-    const handleClose = (event, reason) => {
-        if (reason === 'clickaway') {
-            return;
-        }
+    // const handleClose = (event, reason) => {
+    //     if (reason === 'clickaway') {
+    //         return;
+    //     }
 
-        setOpen(false);
-    };
-
-    
-    console.log(typeOfUser);
+    //     setOpen(false);
+    // };
 
     // Toggle button
     const [showPassword, setShowPassword] = useState(false);
@@ -233,7 +225,7 @@ const Registration = () => {
                     </Box>
 
                     {/* Ask do they wants to be workspace admin or they want to be normal user */}
-                    <Box>
+                    {/* <Box>
                         <FormControl sx={{ m: 1 }}>
                             <InputLabel id="demo-simple-select-helper-label">Select Your Role</InputLabel>
                             <Select
@@ -246,10 +238,10 @@ const Registration = () => {
                                 <MenuItem value="Normal User">Normal user</MenuItem>
                             </Select>
                         </FormControl>
-                    </Box>
+                    </Box> */}
 
                     {/* Access Token Field */}
-                    {typeOfUser === "Workspace Admin" && (
+                    {/* {typeOfUser === "Workspace Admin" && (
                         <Box display={"flex"} alignItems="center" justifyContent={"flex-start"} gap="10px" >
                             <TextField
                                 id="outlined-password-input"
@@ -272,9 +264,9 @@ const Registration = () => {
                                 message="Text copied"
                             />
                         </Box>  
-                    )}
+                    )} */}
 
-                    <Button onClick={handleRegistration} disabled={typeOfUser === 'Workspace Admin' && getToken === ''}  variant="contained" sx={{width: '300px', backgroundColor: '#1E8CF1', marginTop: '5px'}} disableElevation>Create an account</Button>
+                    <Button onClick={handleRegistration} variant="contained" sx={{width: '300px', backgroundColor: '#1E8CF1', marginTop: '5px'}} disableElevation>Create an account</Button>
 
                     <p style={{opacity: 0.3, position: 'fixed', bottom: 0}}>Copyright 2023. Thesis Project Purposes.</p>
                 </div>
