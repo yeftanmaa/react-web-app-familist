@@ -26,7 +26,7 @@ export default function useFetchCashflowHistory(selectedMonth) {
             collection(schedulerDoc.ref, 'payments'),
             where('lastPaid', '>=', new Date(`${selectedMonth} 1, 2023`)),
             where('lastPaid', '<=', new Date(`${selectedMonth} 31, 2023`)),
-            orderBy('lastPaid', 'asc')
+            orderBy('lastPaid', 'desc')
           );
           const paymentsSnapshot = await getDocs(paymentsQuery);
       

@@ -47,7 +47,7 @@ const Login = () => {
             setSnackbarOpen(true);
             setTimeout(() => {
                 setSnackbarOpen(false);
-            }, 3000);
+            }, 1500);
         }
     }
 
@@ -83,7 +83,7 @@ const Login = () => {
             setSnackbarOpen(true);
             setTimeout(() => {
                 setSnackbarOpen(false);
-            }, 3000);
+            }, 1500);
         }
     }
 
@@ -95,14 +95,14 @@ const Login = () => {
             setSnackbarOpen(true);
             setTimeout(() => {
                 setSnackbarOpen(false);
-            }, 3000);
+            }, 1500);
         } catch(err) {
             setSnackbarMessage('Please provide correct email!');
             setSnackbarSeverity('warning');
             setSnackbarOpen(true);
             setTimeout(() => {
                 setSnackbarOpen(false);
-            }, 3000);
+            }, 1500);
         }
         
     };

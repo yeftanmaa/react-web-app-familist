@@ -68,13 +68,13 @@ const Registration = () => {
                 });
 
                 // confirm to user and navigate to login
-                setSnackbarMessage('Your account successfully created!');
+                setSnackbarMessage('Account created! Please verify it on inbox or spam');
                 setSnackbarSeverity('success');
                 setSnackbarOpen(true);
                 setTimeout(() => {
                     setSnackbarOpen(false);
                     navigate('/');
-                }, 3000);
+                }, 1500);
             } catch(err) {
                 setSnackbarMessage('Error! Could not create your account.');
                 setSnackbarSeverity('error');
@@ -86,7 +86,7 @@ const Registration = () => {
             setSnackbarOpen(true);
             setTimeout(() => {
                 setSnackbarOpen(false);
-            }, 3000);
+            }, 1500);
         }
     };
 
