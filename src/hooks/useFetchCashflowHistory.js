@@ -11,7 +11,7 @@ export default function useFetchCashflowHistory(selectedMonth) {
       const fetchData = async () => {
         setIsLoading(true);
         const schedulerCol = collection(db, 'scheduler');
-        const schedulerQuery = query(schedulerCol);
+        const schedulerQuery = query(schedulerCol, orderBy('createdAt', 'asc'));
         const schedulerSnapshot = await getDocs(schedulerQuery);
         const docs = [];
         let highestPaid = 0;

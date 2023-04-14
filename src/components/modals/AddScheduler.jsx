@@ -71,6 +71,8 @@ const ModalAddScheduler = ({open, handleClose, onCloseClick}) => {
             alert('Scheduler title is mandatory!');
         } else if (schedulerType === "") {
             alert('Scheduler type is mandatory!');
+        } else if (billFixedAmount > installmentTotalPayment) {
+            alert('Fixed bill should be less than total installment payment');
         } else {
             try {
                 const newSchedulerData = {
@@ -99,7 +101,6 @@ const ModalAddScheduler = ({open, handleClose, onCloseClick}) => {
                 const paymentsRef = collection(newSchedulerDoc, "payments");
                 const paymentData = {   
                     remainingBill: Number(installmentTotalPayment),
-                    lastPaid: Timestamp.fromDate(new Date())
                 };
 
                 if (isBillFixed) {
