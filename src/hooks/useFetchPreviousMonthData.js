@@ -8,7 +8,7 @@ export default function useFetchPreviousMonthData(selectedMonth) {
     useEffect(() => {
       const fetchData = async () => {
         const schedulerCol = collection(db, 'scheduler');
-        const schedulerQuery = query(schedulerCol);
+        const schedulerQuery = query(schedulerCol, orderBy('createdAt', 'asc'));
         const schedulerSnapshot = await getDocs(schedulerQuery);
         const docs = [];
         let highestPaid = 0;
@@ -23,7 +23,7 @@ export default function useFetchPreviousMonthData(selectedMonth) {
             collection(schedulerDoc.ref, 'payments'),
             where('lastPaid', '>=', new Date(`${selectedMonth} 1, 2023`)),
             where('lastPaid', '<=', new Date(`${selectedMonth} 31, 2023`)),
-            orderBy('lastPaid', 'asc')
+            orderBy('lastPaid', 'desc')
           );
           const paymentsSnapshot = await getDocs(paymentsQuery);
   

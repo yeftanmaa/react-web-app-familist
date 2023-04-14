@@ -71,6 +71,8 @@ const ModalAddScheduler = ({open, handleClose, onCloseClick}) => {
             alert('Scheduler title is mandatory!');
         } else if (schedulerType === "") {
             alert('Scheduler type is mandatory!');
+        } else if (billFixedAmount > installmentTotalPayment) {
+            alert('Fixed bill should be less than total installment payment');
         } else {
             try {
                 const newSchedulerData = {
